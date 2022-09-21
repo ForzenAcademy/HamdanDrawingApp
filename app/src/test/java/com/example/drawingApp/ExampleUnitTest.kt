@@ -1,4 +1,4 @@
-package com.example.test
+package com.example.drawingApp
 
 import org.junit.Test
 
