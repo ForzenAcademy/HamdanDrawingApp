@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/pad_1"
+        android:text="@string/new_layer_dialog_title"
+        android:textSize="@dimen/text_1" />
+
+    <EditText
+        android:id="@+id/newLayerField"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/pad_1"
+        android:padding="10dp" />
+
+    <TextView
+        android:id="@+id/dialogCharCountError"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/charCountError"
+        android:textColor="?standardErrorText"
+        android:visibility="invisible" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:weightSum="4">
+
+        <TextView
+            android:id="@+id/newLayerOk"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/pad_1"
+            android:layout_weight="1"
+            android:background="@drawable/text_btn_background_"
+            android:gravity="center"
+            android:padding="@dimen/pad_1"
+            android:text="@string/Ok" />
+
+        <TextView
+            android:id="@+id/newLayerCancel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/pad_1"
+            android:layout_weight="1"
+            android:background="@drawable/text_btn_background_"
+            android:gravity="center"
+            android:padding="@dimen/pad_1"
+            android:text="@string/cancel" />
+    </LinearLayout>
+
+
+</LinearLayout>

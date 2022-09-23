@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="grid_1">4dp</dimen>
+    <dimen name="grid_2">8dp</dimen>
+    <dimen name="grid_3">12dp</dimen>
+    <dimen name="grid_4">16dp</dimen>
+    <dimen name="grid_5">20dp</dimen>
+    <dimen name="grid_6">24dp</dimen>
+    <dimen name="grid_7">28dp</dimen>
+    <dimen name="grid_gigachad">32dp</dimen>
+
+    <dimen name="pad_1">10dp</dimen>
+    <dimen name="pad_2">20dp</dimen>
+
+    <dimen name="text_1">20sp</dimen>
+    <dimen name="text_2">24sp</dimen>
+    <dimen name="text_3">28sp</dimen>
+    <dimen name="text_4">32sp</dimen>
+    <dimen name="text_5">36sp</dimen>
+    <dimen name="text_6">40sp</dimen>
+
+
+
+</resources>

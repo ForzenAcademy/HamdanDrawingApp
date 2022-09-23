@@ -20,6 +20,7 @@ class DrawingFieldView @JvmOverloads constructor(
     defStyle: Int = 0
 ) : View(context, attrs, defStyle) {
 
+    var onFinishLine: ((Bitmap) -> Unit)? = null
     private var paint = Paint().apply {
         color = Color.BLACK
         style = Paint.Style.STROKE
@@ -31,6 +32,7 @@ class DrawingFieldView @JvmOverloads constructor(
     private var path = Path()
     private var calcCanvas: Canvas? = null
 
+
     init {
         setOnTouchListener { _, motionEvent ->
             when (motionEvent.action) {
@@ -41,6 +43,7 @@ class DrawingFieldView @JvmOverloads constructor(
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                     heldDown = false
                     path = Path()
+                    canvasBitmap?.let { onFinishLine?.invoke(it) }
                 }
                 MotionEvent.ACTION_MOVE -> {
                     //can add an if statement that if the motionEvent is out of bounds held = false
@@ -59,6 +62,15 @@ class DrawingFieldView @JvmOverloads constructor(
 
     fun updateColor(c: Int) {
         paint.color = c
+    }
+
+    /**
+     * To set the active drawing bitmap, This is for when the viewmodel needs to
+     * load in the bitmap to have continuity. Will also be useful if other bitmaps need
+     * to be drawn on.
+     */
+    fun setBitmap(b: Bitmap) {
+        canvasBitmap = b
     }
 
     override fun onDraw(canvas: Canvas?) {
