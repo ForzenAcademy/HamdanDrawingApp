@@ -20,6 +20,14 @@ class DrawingFieldView @JvmOverloads constructor(
     defStyle: Int = 0
 ) : View(context, attrs, defStyle) {
 
+    /**
+     * Whenever a line is being drawn call this
+     * specifically triggers on motion event move
+     * Purpose is to update the model's bitmap whenever we are drawing on the bitmap
+     * to keep the state of the bitmap consistent in the case of a outside interference
+     * such as a phone call or a sudden orientation change
+     */
+    var onBitmapUpdate: ((Bitmap) -> Unit)? = null
     private var paint = Paint().apply {
         color = Color.BLACK
         style = Paint.Style.STROKE
@@ -29,7 +37,8 @@ class DrawingFieldView @JvmOverloads constructor(
     private var canvasBitmap: Bitmap? = null
     private var heldDown = false    //used to track if the user is holding finger down on the view
     private var path = Path()
-    private var calcCanvas: Canvas? = null
+    private var drawingCanvas: Canvas? = null
+
 
     init {
         setOnTouchListener { _, motionEvent ->
@@ -47,8 +56,9 @@ class DrawingFieldView @JvmOverloads constructor(
                     //depends if we want this behaviour
                     if (heldDown) {
                         path.lineTo(motionEvent.x, motionEvent.y)
-                        calcCanvas = canvasBitmap?.let { Canvas(it) }
-                        calcCanvas?.drawPath(path, paint)
+                        drawingCanvas = canvasBitmap?.let { Canvas(it) }
+                        canvasBitmap?.let { onBitmapUpdate?.invoke(it) }
+                        drawingCanvas?.drawPath(path, paint)
                         invalidate()
                     }
                 }
@@ -61,14 +71,23 @@ class DrawingFieldView @JvmOverloads constructor(
         paint.color = c
     }
 
+    /**
+     * To set the active drawing bitmap, This is for when the viewmodel needs to
+     * load in the bitmap to have continuity. Will also be useful if other bitmaps need
+     * to be drawn on.
+     */
+    fun setBitmap(b: Bitmap) {
+        canvasBitmap = b
+    }
+
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
 
         canvas?.let { c ->
             if (canvasBitmap == null) {
                 canvasBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-                canvasBitmap?.let { calcCanvas = Canvas(it) }
-                calcCanvas?.drawColor(Color.LTGRAY)
+                canvasBitmap?.let { drawingCanvas = Canvas(it) }
+                drawingCanvas?.drawColor(Color.LTGRAY)
             }
             canvasBitmap?.let { c.drawBitmap(it, 0f, 0f, null) }
         }
