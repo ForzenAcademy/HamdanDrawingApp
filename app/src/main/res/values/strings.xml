@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">DrawingApp</string>
-    <string name="new_layer_dialog_title">Create New Layer</string>
+    <string name="new_layer_dialog_title">Create Layer</string>
+    <string name="edit_layer_dialog_title">Edit Layer</string>
     <string name="new_layer_hint">Layer %d</string>
     <string name="ok">Ok</string>
     <string name="cancel">Cancel</string>
