@@ -6,7 +6,10 @@
     <string name="new_layer_hint">Layer %d</string>
     <string name="ok">Ok</string>
     <string name="submit">Submit</string>
+    <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>
+    <string name="deleting">Deleting</string>
+    <string name="delete_confirmation_text">Are you sure you want to Delete?</string>
     <string name="charCountError">Your name is too long!</string>
     <string name="layerExistsError">Your layer name already exists!</string>
     <string name="dialogPopUpBtn">New Layer</string>

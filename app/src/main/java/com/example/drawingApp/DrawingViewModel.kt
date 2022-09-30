@@ -13,6 +13,7 @@ class DrawingViewModel : ViewModel() {
         val isColorSheetOpen: Boolean,
         val isLayerSheetOpen: Boolean,
         val isLayerDialogOpen: Boolean,
+        val isDeleteDialogOpen: Boolean,
         val chosenColor: Int,
         val circleColor: Int,
         val layers: MutableList<String>,
@@ -21,33 +22,30 @@ class DrawingViewModel : ViewModel() {
         val editIndex: Int?
     )
 
+    private val layerNames: MutableList<String> = mutableListOf()
+
     private var isColorPickerSheetOpen = false
-
     private var chosenColor: Int? = null
-
-    var activeBitmap: Bitmap? = null
-
-    private var hsv = Hsv(0f, 0f, 0f)
-
-    var circleColor: Int = Color.BLACK
+    private var isLayerDialogOpen = false   //new dialog
+    private var isDeleteDialogOpen = false //new delete dialog
+    private var isViewingLayerSheetOpen = false       //edit layer
+    private var _hsv = Hsv(0f, 0f, 0f)
 
     //used to help determine rgb values for consistency
-    var activeColor: Int = Color.BLACK
-    val layerNames: MutableList<String> = mutableListOf()
-
-    fun openColorSheet() {
-        isColorPickerSheetOpen = true
-        updateViewState()
-    }
-
-    var isLayerDialogOpen = false   //new dialog
-    var currentLayerDialogText: String? = null
-
-    var isViewingLayerSheetOpen = false       //edit layer
+    private var activeColor: Int = Color.BLACK
+    private var _currentLayerDialogText: String? = null
 
     //view inside edit layer
-    var layerViewEditDialogIndex: Int? = null
+    private var _layerViewEditDialogIndex: Int? = null
 
+    var activeBitmap: Bitmap? = null
+    var circleColor: Int = Color.BLACK
+
+    /**
+     * used to determine what happens whenever the view is updated / needed to be updated
+     * This is where you will be opening dialogs and things based on whether they were open
+     * or need to be open.
+     */
     var onUpdate: ((ViewState) -> Unit)? = null
 
     private fun updateViewState() {
@@ -56,6 +54,7 @@ class DrawingViewModel : ViewModel() {
                 isColorSheetOpen = isColorPickerSheetOpen,
                 isLayerSheetOpen = isViewingLayerSheetOpen,
                 isLayerDialogOpen = isLayerDialogOpen,
+                isDeleteDialogOpen = isDeleteDialogOpen,
                 chosenColor = chosenColor ?: Color.BLACK,
                 circleColor = circleColor,
                 layers = layerNames,
@@ -66,7 +65,112 @@ class DrawingViewModel : ViewModel() {
         )
     }
 
-    fun closeColorSheet(isNotSubmitted: Boolean) {
+    fun initialize() {
+        if (layerNames.isEmpty()) layerNames.add("Layer 1")
+        updateViewState()
+    }
+
+    private fun updateColorFromHsv() {
+        activeColor = hsv.toColor()
+    }
+
+    fun hsvColorUpdate(hue: Float?, saturation: Float?, value: Float?) {
+        val hsvHue = hue ?: hsv.hue
+        val hsvSat = saturation ?: hsv.saturation
+        val hsvVal = value ?: hsv.value
+        hsv = (Hsv(hsvHue, hsvSat, hsvVal))
+        updateColorFromHsv()
+    }
+
+    //region getters / setters
+    var hsv: Hsv
+        get() = _hsv
+        set(value) {
+            _hsv = value
+        }
+
+
+    private fun setChosenColor(color: Int) {
+        chosenColor = color
+    }
+
+    var currentLayerDialogText: String?
+        get() = _currentLayerDialogText
+        set(value) {
+            _currentLayerDialogText = value ?: _currentLayerDialogText
+        }
+
+    var layerViewEditDialogIndex: Int?
+        get() = _layerViewEditDialogIndex
+        set(value) {
+            _layerViewEditDialogIndex = value ?: _layerViewEditDialogIndex
+        }
+
+    //endregion
+    //region clicked functions
+    fun deleteButtonClicked(index: Int) {
+        layerViewEditDialogIndex = index
+        isDeleteDialogOpen = true
+        updateViewState()
+    }
+
+    fun newLayerClicked() {
+        isLayerDialogOpen = true
+        updateViewState()
+    }
+
+    fun layerListClicked() {
+        openLayerListDialog()
+    }
+
+    fun editLayerClicked(index: Int) {
+        layerViewEditDialogIndex = index
+        isLayerDialogOpen = true
+        updateViewState()
+    }
+
+    fun colorPickerClicked() {
+        openColorSheet()
+    }
+
+    //region submitClickFunctions
+    fun submitNewLayerClicked(newString: String) {
+        addLayer(newString)
+    }
+
+    fun submitColorPickerClicked(color: Int?) {
+        if (color != null) {
+            setChosenColor(color)
+            closeColorSheet(false)
+        } else {
+            closeColorSheet(true)
+        }
+    }
+
+    fun submitDeleteDialogClicked() {
+        layerViewEditDialogIndex?.let { removeLayer(it) }
+        closeDeleteDialog()
+    }
+
+    fun submitLayerEditClicked(newString: String) {
+        layerViewEditDialogIndex?.let { replaceLayer(it, newString) }
+    }
+
+    //endregion
+    //region close Click Functions
+    fun layerSheetCloseClicked() {
+        closeLayersSheet()
+    }
+    //endregion
+
+    //endregion
+    //region clicked functions Utilities
+    private fun openColorSheet() {
+        isColorPickerSheetOpen = true
+        updateViewState()
+    }
+
+    private fun closeColorSheet(isNotSubmitted: Boolean) {
         isColorPickerSheetOpen = false
         if (!isNotSubmitted) {
             hsv = Hsv(0f, 0f, 0f)
@@ -74,60 +178,44 @@ class DrawingViewModel : ViewModel() {
         updateViewState()
     }
 
-    fun initialize() {
-        if (layerNames.isEmpty()) layerNames.add("Layer 1")
-        updateViewState()
-    }
-
-    fun openAlertDialog() {
-        isLayerDialogOpen = true
-        updateViewState()
-    }
-
-    fun closeAlertDialog() {
-        isLayerDialogOpen = false
-        currentLayerDialogText = ""
-        updateViewState()
-    }
-
-    fun openLayersSheet() {
-        isViewingLayerSheetOpen = true
-        updateViewState()
-    }
-
-    fun closeLayersSheet() {
+    private fun closeLayersSheet() {
         isViewingLayerSheetOpen = false
         layerViewEditDialogIndex = null
         updateViewState()
     }
 
-    fun addLayer(layer: String) {
+    private fun addLayer(layer: String) {
         layerNames.add(layer)
+        currentLayerDialogText = ""
+        closeAlertDialog()
     }
 
-    fun removeLayer(index: Int) {
+    private fun removeLayer(index: Int) {
         layerNames.removeAt(index)
     }
 
-    fun replaceLayer(index: Int, replacementLayer: String) {
+    private fun replaceLayer(index: Int, replacementLayer: String) {
         layerNames[index] = replacementLayer
+        currentLayerDialogText = ""
+        closeAlertDialog()
     }
 
-    fun updateColorFromHsv() {
-        hsv.toColor().let {
-            activeColor = it
-        }
+    private fun closeAlertDialog() {
+        isLayerDialogOpen = false
+        currentLayerDialogText = ""
+        updateViewState()
     }
 
-    fun setHsv(newHsv: Hsv) {
-        hsv = newHsv
+    fun closeDeleteDialog() {
+        isDeleteDialogOpen = false
+        updateViewState()
     }
 
-    fun getHsv() = hsv
-
-    fun setChosenColor(color: Int) {
-        chosenColor = color
+    private fun openLayerListDialog() {
+        isViewingLayerSheetOpen = true
+        updateViewState()
     }
+    //endregion
 
     fun getViewModelScope(): CoroutineScope {
         return this.viewModelScope

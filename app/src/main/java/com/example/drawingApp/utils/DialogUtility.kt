@@ -21,10 +21,14 @@ object DialogUtility {
     const val MAX_CHAR_LEN = 16
 
     /**
-     * used to updated the sheet adapter with the onEdit lambda
+     * used to update the sheet adapter with the onEdit and onDelete lambda
      * the sheet is for dismissing to avoid window leaks
      */
-    data class SheetObject(val sheet: BottomSheetDialog, val onEdit: (Int, String) -> Unit)
+    data class SheetObject(
+        val sheet: BottomSheetDialog,
+        val onEdit: (Int, String) -> Unit,
+        val onDelete: (Int) -> Unit
+    )
 
     /**
      * opens a dialog that will take a string and allows you to interact with the string
@@ -131,9 +135,7 @@ object DialogUtility {
             data = data,
             onDeleteClick = { layerModel ->
                 val index = data.indexOf(layerModel)
-                data.removeAt(index)
                 onDelete(index)
-                myAdapter.notifyItemRemoved(index)
             },
             onEditClick = { layerModel ->
                 val index = data.indexOf(layerModel)
@@ -154,9 +156,48 @@ object DialogUtility {
         sheet.setOnDismissListener { onSheetDismiss() }
         sheet.show()
 
-        return SheetObject(sheet) { index, str ->
-            data[index] = LayerViewModel(str)
-            myAdapter.notifyItemChanged(index)
+        return SheetObject(
+            sheet = sheet,
+            onEdit = { index, str ->
+                data[index] = LayerViewModel(str)
+                myAdapter.notifyItemChanged(index)
+            }
+        ) { index ->
+            data.removeAt(index)
+            myAdapter.notifyItemRemoved(index)
         }
+    }
+
+    /**
+     * Shows a dialog to confirm or cancel a deletion
+     * calls onDismiss whenever the dialog is closed, ideally use this to let yourself know that the dialog is closed so its not open on rotation
+     * calls onSubmission on positive button press
+     */
+    fun showDeleteDialog(
+        context: Context,
+        /**
+         * occurs whenever the view is closed, use to set external variables to whatever you need when the dialog is closed
+         */
+        onDismiss: () -> Unit,
+        /**
+         * calls when confirm is pressed, use to actualy perform the actions you want taken on submit
+         */
+        onSubmission: () -> Unit
+    ): AlertDialog {
+        val dialog = AlertDialog.Builder(context)
+        dialog.setTitle(R.string.deleting)
+        dialog.setMessage(R.string.delete_confirmation_text)
+        dialog.apply {
+            setPositiveButton(R.string.confirm) { _, _ ->
+                onSubmission()
+            }
+            setNegativeButton(R.string.cancel) { _, _ -> }
+        }
+        val alert = dialog.create()
+        dialog.setOnDismissListener {
+            onDismiss()
+        }
+        dialog.show()
+        return alert
     }
 }
