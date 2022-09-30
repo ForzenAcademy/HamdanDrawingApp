@@ -6,14 +6,12 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-
-    <com.example.drawingApp.DrawingFieldView
+    <com.example.drawingApp.CustomViews.DrawingFieldView
         android:id="@+id/drawField"
         android:layout_width="250dp"
         android:layout_height="250dp"
         android:layout_gravity="center"
         android:layout_margin="@dimen/pad_1" />
-
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -21,7 +19,7 @@
         android:gravity="center"
         android:orientation="horizontal">
 
-        <com.example.drawingApp.SelectedColorView
+        <com.example.drawingApp.CustomViews.ColorCircleView
             android:id="@+id/colorCircle"
             android:layout_width="50dp"
             android:layout_height="50dp"
@@ -45,8 +43,22 @@
             android:text="editLayer"
             android:textSize="@dimen/text_1" />
 
+        <TextView
+            android:id="@+id/colorPickerBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/text_btn_background_"
+            android:padding="@dimen/grid_1"
+            android:text="ColorPicker"
+            android:textSize="@dimen/text_1" />
 
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/colorBlock"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:background="#000000"
+        android:text="Hello World!" />
 
 </LinearLayout>

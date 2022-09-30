@@ -1,4 +1,4 @@
-package com.example.drawingApp
+package com.example.drawingApp.CustomViews
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -6,7 +6,6 @@ import android.graphics.*
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-
 
 @SuppressLint("ClickableViewAccessibility")
 /**
@@ -19,7 +18,6 @@ class DrawingFieldView @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyle: Int = 0
 ) : View(context, attrs, defStyle) {
-
     /**
      * Whenever a line is being drawn call this
      * specifically triggers on motion event move
@@ -39,6 +37,13 @@ class DrawingFieldView @JvmOverloads constructor(
     private var path = Path()
     private var drawingCanvas: Canvas? = null
 
+    fun setBitmap(bitmap: Bitmap) {
+        canvasBitmap = bitmap
+    }
+
+    fun setPaintColor(paintColor: Int) {
+        paint.color = paintColor
+    }
 
     init {
         setOnTouchListener { _, motionEvent ->
@@ -65,19 +70,6 @@ class DrawingFieldView @JvmOverloads constructor(
             }
             true
         }
-    }
-
-    fun updateColor(c: Int) {
-        paint.color = c
-    }
-
-    /**
-     * To set the active drawing bitmap, This is for when the viewmodel needs to
-     * load in the bitmap to have continuity. Will also be useful if other bitmaps need
-     * to be drawn on.
-     */
-    fun setBitmap(b: Bitmap) {
-        canvasBitmap = b
     }
 
     override fun onDraw(canvas: Canvas?) {

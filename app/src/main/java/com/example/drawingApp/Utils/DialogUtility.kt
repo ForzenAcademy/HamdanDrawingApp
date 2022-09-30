@@ -1,4 +1,4 @@
-package com.example.drawingApp
+package com.example.drawingApp.Utils
 
 
 import android.content.Context
@@ -11,6 +11,9 @@ import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.drawingApp.EditLayerAdapter
+import com.example.drawingApp.LayerViewModel
+import com.example.drawingApp.R
 import com.google.android.material.bottomsheet.BottomSheetDialog
 
 object DialogUtility {

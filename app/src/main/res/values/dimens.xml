@@ -12,6 +12,12 @@
     <dimen name="pad_1">10dp</dimen>
     <dimen name="pad_2">20dp</dimen>
 
+    <dimen name="text_small_1">10sp</dimen>
+    <dimen name="text_small_2">12sp</dimen>
+    <dimen name="text_small_3">14sp</dimen>
+    <dimen name="text_small_4">16sp</dimen>
+    <dimen name="text_small_5">18sp</dimen>
+
     <dimen name="text_1">20sp</dimen>
     <dimen name="text_2">24sp</dimen>
     <dimen name="text_3">28sp</dimen>
@@ -25,5 +31,11 @@
     <dimen name="corner_rounding_4">16dp</dimen>
     <dimen name="corner_rounding_5">18dp</dimen>
     <dimen name="corner_rounding_6">20dp</dimen>
+
+    <dimen name="editText_1">40dp</dimen>
+    <dimen name="editText_2">44dp</dimen>
+    <dimen name="editText_3">52dp</dimen>
+    <dimen name="editText_4">56dp</dimen>
+    <dimen name="editText_5">60dp</dimen>
 
 </resources>
