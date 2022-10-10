@@ -3,13 +3,19 @@ package com.example.drawingApp
 import android.os.Bundle
 import android.os.StrictMode
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-
+import com.example.drawingApp.CustomViews.ColorCircleView
+import com.example.drawingApp.CustomViews.DrawingFieldView
+import com.example.drawingApp.DataClasses.Hsv
+import com.example.drawingApp.Utils.ColorPickerUtility
+import com.example.drawingApp.Utils.DialogUtility
 
 class MainActivity : AppCompatActivity() {
     private val model: DrawingViewModel by viewModels()
+    private var isColorSheetOpen = false
 
     var botSheetObj: DialogUtility.SheetObject? = null
     var alertDialog: AlertDialog? = null
@@ -18,7 +24,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         enableStrictMode()
-        val colorCircleView = findViewById<SelectedColorView>(R.id.colorCircle)
+        val colorCircleView = findViewById<ColorCircleView>(R.id.colorCircle)
         val drawingFieldView = findViewById<DrawingFieldView>(R.id.drawField)
         var onSubmission: (String?) -> Boolean
 
@@ -26,12 +32,11 @@ class MainActivity : AppCompatActivity() {
             model.activeBitmap = it
         }
         colorCircleView.onColorChange = { stateColor ->
-            model.primaryColor = stateColor
-            drawingFieldView.updateColor(stateColor)
+            model.circleColor = stateColor
+            drawingFieldView.setPaintColor(stateColor)
         }
         //whenever we recieve a need to update the state of the view
         model.onUpdate = { state ->
-            var creating = true
 
             state.activeBitmap?.let {
                 drawingFieldView.setBitmap(it)
@@ -42,7 +47,7 @@ class MainActivity : AppCompatActivity() {
             onSubmission = { layerText ->
                 if (state.layers.contains(layerText)) false
                 else {
-                    if (state.isLayerSheetOpen && state.isAlertDialogOpen) {
+                    if (state.isLayerSheetOpen && state.isLayerDialogOpen) {
                         if (botSheetObj != null && alertDialog != null) {
                             model.layerViewEditDialogIndex?.let { index ->
                                 layerText?.let { layerText ->
@@ -73,26 +78,60 @@ class MainActivity : AppCompatActivity() {
                     onDelete = { model.removeLayer(it) },
                     onSheetDismiss = {
                         botSheetObj?.sheet?.dismiss()
-                        botSheetObj=null
+                        botSheetObj = null
                         model.closeLayersSheet()
                     }
                 )
             }
             //if the dialog is open, open it with the correct type of submission
-            if (state.isAlertDialogOpen && alertDialog == null) {
+            if (state.isLayerDialogOpen && alertDialog == null) {
                 alertDialog = DialogUtility.showLayerAlertDialog(
                     context = this,
                     startString = hintText(state.layers, state.layerDialogText),
-                    isCreatingNewLayer = creating,
+                    isCreatingNewLayer = !state.isLayerSheetOpen,   //way to check if were editing or creating a layer
                     onTextChanged = { model.currentLayerDialogText = it },
                     onDialogSubmission = onSubmission,
                 )
             }
 
+            if (state.isColorSheetOpen && !isColorSheetOpen) {
+                isColorSheetOpen = true
+                ColorPickerUtility.colorPickerSheet(context = this,
+                    onColorUpdate = { hue, saturation, value ->
+                        val hsvHue = hue ?: model.getHsv().hue
+                        val hsvSat = saturation ?: model.getHsv().saturation
+                        val hsvVal = value ?: model.getHsv().value
+                        model.setHsv(Hsv(hsvHue, hsvSat, hsvVal))
+                        model.updateColorFromHsv()
+                    },
+                    onColorTextForceUpdate = {
+                        ColorPickerUtility.ColorPack(
+                            model.getHsv(),
+                            previousColor = state.chosenColor,
+                        )
+                    },
+                    onSubmission = { color ->
+                        val isNull = color == null
+                        color?.let {
+                            model.setChosenColor(it)
+                            Toast.makeText(this, "Chosen Color: $it", Toast.LENGTH_SHORT).show()
+                        }
+                        isColorSheetOpen = false
+                        model.closeColorSheet(isNull)
+                    }
+                )
+            }
+            //used to persist the state of the color circle, and the actively drawn color
+            colorCircleView.setColor(state.circleColor)
+            colorCircleView.onColorChange?.let { it(state.circleColor) }
         }
 
         findViewById<TextView>(R.id.newLayer).setOnClickListener {
             model.openAlertDialog()
+        }
+
+        findViewById<TextView>(R.id.colorPickerBtn).setOnClickListener {
+            model.openColorSheet()
         }
 
         findViewById<TextView>(R.id.editLayer).setOnClickListener {
@@ -100,7 +139,21 @@ class MainActivity : AppCompatActivity() {
         }
 
         model.initialize()
+    }
 
+    fun hintText(layers: List<String>, refString: String): String {
+        if (refString != "") return refString
+        var layerCounter = 1
+        while (layers.contains(
+                resources.getString(
+                    R.string.new_layer_hint,
+                    layerCounter
+                )
+            )
+        ) {
+            layerCounter += 1
+        }
+        return resources.getString(R.string.new_layer_hint, layerCounter)
     }
 
     private fun enableStrictMode() {
@@ -118,21 +171,6 @@ class MainActivity : AppCompatActivity() {
                 .penaltyDeath()
                 .build()
         );
-    }
-
-    fun hintText(layers: List<String>, refString: String): String {
-        if (refString != "") return refString
-        var layerCounter = 1
-        while (layers.contains(
-                resources.getString(
-                    R.string.new_layer_hint,
-                    layerCounter
-                )
-            )
-        ) {
-            layerCounter += 1
-        }
-        return resources.getString(R.string.new_layer_hint, layerCounter)
     }
 
 }

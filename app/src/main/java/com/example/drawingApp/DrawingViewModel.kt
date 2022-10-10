@@ -2,27 +2,41 @@ package com.example.drawingApp
 
 import android.graphics.Bitmap
 import android.graphics.Color
-import androidx.annotation.ColorInt
 import androidx.lifecycle.ViewModel
+import com.example.drawingApp.DataClasses.Hsv
 
 class DrawingViewModel : ViewModel() {
 
     data class ViewState(
-        val color: Int,
-        val layers: MutableList<String>,
-        val activeBitmap: Bitmap?,
-        val isAlertDialogOpen: Boolean,
-        val layerDialogText: String,
+        val isColorSheetOpen: Boolean,
         val isLayerSheetOpen: Boolean,
+        val isLayerDialogOpen: Boolean,
+        val chosenColor: Int,
+        val circleColor: Int,
+        val layers: MutableList<String>,
+        val layerDialogText: String,
+        val activeBitmap: Bitmap?,
         val editIndex: Int?
     )
 
-    @ColorInt
-    var primaryColor = Color.BLACK
+    private var isColorPickerSheetOpen = false
 
-    private val layerNames: MutableList<String> = mutableListOf()
+    private var chosenColor: Int? = null
 
     var activeBitmap: Bitmap? = null
+
+    private var hsv = Hsv(0f, 0f, 0f)
+
+    var circleColor: Int = Color.BLACK
+
+    //used to help determine rgb values for consistency
+    var activeColor: Int = Color.BLACK
+    val layerNames: MutableList<String> = mutableListOf()
+
+    fun openColorSheet() {
+        isColorPickerSheetOpen = true
+        updateViewState()
+    }
 
     var isLayerDialogOpen = false   //new dialog
     var currentLayerDialogText: String? = null
@@ -37,15 +51,25 @@ class DrawingViewModel : ViewModel() {
     private fun updateViewState() {
         onUpdate?.invoke(
             ViewState(
-                primaryColor,
-                layerNames,
-                activeBitmap,
-                isLayerDialogOpen,
-                currentLayerDialogText ?: "",
-                isViewingLayerSheetOpen,
-                layerViewEditDialogIndex
+                isColorSheetOpen = isColorPickerSheetOpen,
+                isLayerSheetOpen = isViewingLayerSheetOpen,
+                isLayerDialogOpen = isLayerDialogOpen,
+                chosenColor = chosenColor ?: Color.BLACK,
+                circleColor = circleColor,
+                layers = layerNames,
+                layerDialogText = currentLayerDialogText ?: "",
+                activeBitmap = activeBitmap,
+                editIndex = layerViewEditDialogIndex
             )
         )
+    }
+
+    fun closeColorSheet(isNotSubmitted: Boolean) {
+        isColorPickerSheetOpen = false
+        if (!isNotSubmitted) {
+            hsv = Hsv(0f, 0f, 0f)
+        }
+        updateViewState()
     }
 
     fun initialize() {
@@ -87,4 +111,19 @@ class DrawingViewModel : ViewModel() {
         layerNames[index] = replacementLayer
     }
 
+    fun updateColorFromHsv() {
+        hsv.toColor()?.let {
+            activeColor = it
+        }
+    }
+
+    fun setHsv(newHsv: Hsv) {
+        hsv = newHsv
+    }
+
+    fun getHsv() = hsv
+
+    fun setChosenColor(color: Int) {
+        chosenColor = color
+    }
 }

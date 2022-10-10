@@ -1,12 +1,25 @@
 <resources>
+
     <string name="app_name">DrawingApp</string>
     <string name="new_layer_dialog_title">Create Layer</string>
     <string name="edit_layer_dialog_title">Edit Layer</string>
     <string name="new_layer_hint">Layer %d</string>
     <string name="ok">Ok</string>
+    <string name="submit">Submit</string>
     <string name="cancel">Cancel</string>
     <string name="charCountError">Your name is too long!</string>
     <string name="layerExistsError">Your layer name already exists!</string>
     <string name="dialogPopUpBtn">New Layer</string>
+
+    <string name="default_int">0</string>
+    <string name="default_hex">000000</string>
+
+    <string name="hue_H">H:</string>
+    <string name="saturation_S">S:</string>
+    <string name="value_V">V:</string>
+    <string name="rgb_red_R">R:</string>
+    <string name="rgb_green_G">G:</string>
+    <string name="rgb_blue_B">B:</string>
+    <string name="hex_pound">#</string>
 
 </resources>

@@ -1,4 +1,4 @@
-package com.example.drawingApp
+package com.example.drawingApp.CustomViews
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -18,7 +18,7 @@ import android.view.View
  * the color order is Black, Red, Green, Blue
  *
  */
-class SelectedColorView @JvmOverloads constructor(
+class ColorCircleView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyle: Int = 0
@@ -35,6 +35,10 @@ class SelectedColorView @JvmOverloads constructor(
      */
     var onColorChange: ((Int) -> Unit)? = null
 
+    fun setColor(checkColor: Int) {
+        state = checkColor
+        paint.color = state
+    }
 
     init {
         setOnTouchListener { _, mE ->
