@@ -2,19 +2,17 @@ package com.example.drawingApp
 
 import android.os.Bundle
 import android.os.StrictMode
-import android.view.LayoutInflater
-import android.view.View
-import android.widget.EditText
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.isVisible
-import androidx.core.widget.addTextChangedListener
+
 
 class MainActivity : AppCompatActivity() {
     private val model: DrawingViewModel by viewModels()
+
+    var botSheetObj: DialogUtility.SheetObject? = null
+    var alertDialog: AlertDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,81 +20,86 @@ class MainActivity : AppCompatActivity() {
         enableStrictMode()
         val colorCircleView = findViewById<SelectedColorView>(R.id.colorCircle)
         val drawingFieldView = findViewById<DrawingFieldView>(R.id.drawField)
+        var onSubmission: (String?) -> Boolean
 
         drawingFieldView.onBitmapUpdate = {
             model.activeBitmap = it
         }
-
-        findViewById<TextView>(R.id.newLayer).setOnClickListener {
-            showLayerAlertDialog()
-        }
-
-        model.activeBitmap?.let {
-            drawingFieldView.setBitmap(it)
-            drawingFieldView.invalidate()
-        }
-
         colorCircleView.onColorChange = { stateColor ->
             model.primaryColor = stateColor
             drawingFieldView.updateColor(stateColor)
         }
+        //whenever we recieve a need to update the state of the view
+        model.onUpdate = { state ->
+            var creating = true
 
-        if (model.isLayerCreationDialogOpen) showLayerAlertDialog()
-
-    }
-
-    fun showLayerAlertDialog() {
-        val inflater = LayoutInflater.from(this@MainActivity)
-        val view = inflater.inflate(R.layout.layer_dialog, null)
-        val layerField = view.findViewById<EditText>(R.id.newLayerField)
-        val errorText = view.findViewById<TextView>(R.id.dialogError)
-        var layerCounter = 1
-
-        //find the first available layer name not taken
-        while (model.layerNames.contains(getString(R.string.new_layer_hint, layerCounter))) {
-            layerCounter += 1
-        }
-        layerField.setText(getString(R.string.new_layer_hint, layerCounter))
-
-        //needs to be after the set text or else the textchanged listener will overwrite the previous text needed for rotations
-        layerField.addTextChangedListener {
-            val fieldString = it.toString().trim()
-            model.currentLayerCreationDialogText = fieldString
-            errorText.setText(R.string.charCountError)
-            errorText.isVisible = fieldString.length > MAX_CHAR_LEN
-        }
-
-        val dialog = AlertDialog.Builder(this).apply {
-            setView(view)
-        }.create()
-
-        view.findViewById<TextView>(R.id.newLayerCancel).setOnClickListener {
-            dialog.dismiss()
-        }
-
-        view.findViewById<TextView>(R.id.newLayerOk).setOnClickListener {
-            val fieldString = layerField.text.toString().trim()
-            if (fieldString.length > MAX_CHAR_LEN) {
-                errorText.visibility = View.VISIBLE
-            } else if (model.layerNames.contains(fieldString)) {
-                errorText.setText(R.string.layerExistsError)
-                errorText.visibility = View.VISIBLE
-            } else {
-                model.layerNames.add(fieldString)
-                Toast.makeText(this@MainActivity, fieldString, Toast.LENGTH_SHORT)
-                    .show()
-                dialog.dismiss()
+            state.activeBitmap?.let {
+                drawingFieldView.setBitmap(it)
+                drawingFieldView.invalidate()
             }
+            //based on the state of the sheet alertdialog being open or closed as well as if the
+            //sheet is open or closed, change how the submission function of the dialog works
+            onSubmission = { layerText ->
+                if (state.layers.contains(layerText)) false
+                else {
+                    if (state.isLayerSheetOpen && state.isAlertDialogOpen) {
+                        if (botSheetObj != null && alertDialog != null) {
+                            model.layerViewEditDialogIndex?.let { index ->
+                                layerText?.let { layerText ->
+                                    model.replaceLayer(index, layerText)
+                                    botSheetObj?.onEdit?.invoke(index, layerText)
+                                }
+                            }
+                        }
+                    } else {
+                        layerText?.let { model.addLayer(it) }
+                    }
+                    alertDialog?.dismiss()
+                    alertDialog = null
+                    model.currentLayerDialogText = ""
+                    model.closeAlertDialog()
+                    true
+                }
+            }
+            //if the sheet is open, open it with the correct information
+            if (state.isLayerSheetOpen && botSheetObj == null) {
+                botSheetObj = DialogUtility.showViewingLayersDialog(
+                    context = this,
+                    layerNames = state.layers,
+                    onEdit = {
+                        model.layerViewEditDialogIndex = it
+                        model.openAlertDialog()
+                    },
+                    onDelete = { model.removeLayer(it) },
+                    onSheetDismiss = {
+                        botSheetObj?.sheet?.dismiss()
+                        botSheetObj=null
+                        model.closeLayersSheet()
+                    }
+                )
+            }
+            //if the dialog is open, open it with the correct type of submission
+            if (state.isAlertDialogOpen && alertDialog == null) {
+                alertDialog = DialogUtility.showLayerAlertDialog(
+                    context = this,
+                    startString = hintText(state.layers, state.layerDialogText),
+                    isCreatingNewLayer = creating,
+                    onTextChanged = { model.currentLayerDialogText = it },
+                    onDialogSubmission = onSubmission,
+                )
+            }
+
         }
-        //this is here so that in the case that the dialogue was previously open
-        //we will immediately know to set the text to what it was previously
-        //the reason it is here, is so that we avoid overriding the correct text
-        if (model.isLayerCreationDialogOpen) {
-            layerField.setText(model.currentLayerCreationDialogText)
+
+        findViewById<TextView>(R.id.newLayer).setOnClickListener {
+            model.openAlertDialog()
         }
-        model.isLayerCreationDialogOpen = true
-        dialog.setOnDismissListener { model.isLayerCreationDialogOpen = false }
-        dialog.show()
+
+        findViewById<TextView>(R.id.editLayer).setOnClickListener {
+            model.openLayersSheet()
+        }
+
+        model.initialize()
 
     }
 
@@ -117,7 +120,19 @@ class MainActivity : AppCompatActivity() {
         );
     }
 
-    companion object {
-        private val MAX_CHAR_LEN = 16
+    fun hintText(layers: List<String>, refString: String): String {
+        if (refString != "") return refString
+        var layerCounter = 1
+        while (layers.contains(
+                resources.getString(
+                    R.string.new_layer_hint,
+                    layerCounter
+                )
+            )
+        ) {
+            layerCounter += 1
+        }
+        return resources.getString(R.string.new_layer_hint, layerCounter)
     }
+
 }

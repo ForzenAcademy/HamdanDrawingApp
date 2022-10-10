@@ -9,8 +9,8 @@
 
     <com.example.drawingApp.DrawingFieldView
         android:id="@+id/drawField"
-        android:layout_width="300dp"
-        android:layout_height="300dp"
+        android:layout_width="250dp"
+        android:layout_height="250dp"
         android:layout_gravity="center"
         android:layout_margin="@dimen/pad_1" />
 
@@ -35,6 +35,14 @@
             android:background="@drawable/text_btn_background_"
             android:padding="@dimen/grid_1"
             android:text="@string/dialogPopUpBtn"
+            android:textSize="@dimen/text_1" />
+        <TextView
+            android:id="@+id/editLayer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/text_btn_background_"
+            android:padding="@dimen/grid_1"
+            android:text="editLayer"
             android:textSize="@dimen/text_1" />
 
 
