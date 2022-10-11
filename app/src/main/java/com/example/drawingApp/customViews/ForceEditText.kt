@@ -1,4 +1,4 @@
-package com.example.drawingApp.CustomViews
+package com.example.drawingApp.customViews
 
 import android.content.Context
 import android.text.TextWatcher

@@ -1,4 +1,4 @@
-package com.example.drawingApp.CustomViews
+package com.example.drawingApp.customViews
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -6,6 +6,9 @@ import android.graphics.*
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @SuppressLint("ClickableViewAccessibility")
 /**
@@ -37,8 +40,36 @@ class DrawingFieldView @JvmOverloads constructor(
     private var path = Path()
     private var drawingCanvas: Canvas? = null
 
+    /**
+     * used for setting our previous bitmap from rotation, no expectation of having drawn
+     */
     fun setBitmap(bitmap: Bitmap) {
         canvasBitmap = bitmap
+    }
+
+    /**
+     * sets the bitmap from some image.
+     * If you want the image resized, pass true to resize and also a scope to launch
+     * a coroutine to resize in, if either are not given in that situation it will proceed as usual. The defaults allow you to ignore that if resize is not occuring
+     */
+    fun setBitmapFromImageBitmap(
+        imageBitmap: Bitmap,
+        resize: Boolean = false,
+        scope: CoroutineScope? = null
+    ) {
+        val finish = {
+            canvasBitmap?.let { onBitmapUpdate?.invoke(it) }
+            invalidate()
+        }
+        if (resize && scope != null) {
+            scope?.launch(Dispatchers.IO) {
+                canvasBitmap = Bitmap.createScaledBitmap(imageBitmap, width, height, true)
+                finish()
+            }
+        } else {
+            canvasBitmap = imageBitmap
+            finish()
+        }
     }
 
     fun setPaintColor(paintColor: Int) {
