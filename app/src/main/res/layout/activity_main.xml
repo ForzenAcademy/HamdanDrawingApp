@@ -6,7 +6,7 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <com.example.drawingApp.CustomViews.DrawingFieldView
+    <com.example.drawingApp.customViews.DrawingFieldView
         android:id="@+id/drawField"
         android:layout_width="250dp"
         android:layout_height="250dp"
@@ -19,7 +19,7 @@
         android:gravity="center"
         android:orientation="horizontal">
 
-        <com.example.drawingApp.CustomViews.ColorCircleView
+        <com.example.drawingApp.customViews.ColorCircleView
             android:id="@+id/colorCircle"
             android:layout_width="50dp"
             android:layout_height="50dp"
@@ -54,11 +54,11 @@
 
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/colorBlock"
-        android:layout_width="match_parent"
+    <ImageView
+        android:id="@+id/getImageButton"
+        android:layout_gravity="center"
+        android:layout_width="100dp"
         android:layout_height="100dp"
-        android:background="#000000"
-        android:text="Hello World!" />
+        android:src="@drawable/edit_layer_dialog_edit_icon" />
 
 </LinearLayout>

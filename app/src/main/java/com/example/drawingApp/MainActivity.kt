@@ -2,16 +2,21 @@ package com.example.drawingApp
 
 import android.os.Bundle
 import android.os.StrictMode
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import com.example.drawingApp.CustomViews.ColorCircleView
-import com.example.drawingApp.CustomViews.DrawingFieldView
-import com.example.drawingApp.DataClasses.Hsv
-import com.example.drawingApp.Utils.ColorPickerUtility
-import com.example.drawingApp.Utils.DialogUtility
+import com.example.drawingApp.customViews.ColorCircleView
+import com.example.drawingApp.customViews.DrawingFieldView
+import com.example.drawingApp.dataClasses.Hsv
+import com.example.drawingApp.utils.ColorPickerUtility
+import com.example.drawingApp.utils.DialogUtility
+import com.example.drawingApp.utils.ImageUtility
+
 
 class MainActivity : AppCompatActivity() {
     private val model: DrawingViewModel by viewModels()
@@ -26,8 +31,21 @@ class MainActivity : AppCompatActivity() {
         enableStrictMode()
         val colorCircleView = findViewById<ColorCircleView>(R.id.colorCircle)
         val drawingFieldView = findViewById<DrawingFieldView>(R.id.drawField)
+        val getGalleryImageView = findViewById<ImageView>(R.id.getImageButton)
         var onSubmission: (String?) -> Boolean
+        val imageContent = registerForActivityResult(ActivityResultContracts.GetContent()) {
+            it?.let { uri ->
+                ImageUtility.getBitmapFromUri(uri, this, {
+                    Toast.makeText(this, "Error getting Bitmap from URI", Toast.LENGTH_SHORT)
+                }) { bitmap ->
+                    drawingFieldView.setBitmapFromImageBitmap(bitmap)
+                }
+            }
+        }
 
+        getGalleryImageView.setOnClickListener {
+            launchGalleryImageGetter(imageContent)
+        }
         drawingFieldView.onBitmapUpdate = {
             model.activeBitmap = it
         }
@@ -93,7 +111,7 @@ class MainActivity : AppCompatActivity() {
                     onDialogSubmission = onSubmission,
                 )
             }
-
+            //if the gradient is supposed to be open, open it with the previous state it was in
             if (state.isColorSheetOpen && !isColorSheetOpen) {
                 isColorSheetOpen = true
                 ColorPickerUtility.colorPickerSheet(context = this,
@@ -139,6 +157,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         model.initialize()
+    }
+
+    /**
+     * launches with the purpose of obtaining an image, will open the users gallery
+     */
+    private fun launchGalleryImageGetter(contentLauncher: ActivityResultLauncher<String>) {
+        contentLauncher.launch("image/*")
     }
 
     fun hintText(layers: List<String>, refString: String): String {

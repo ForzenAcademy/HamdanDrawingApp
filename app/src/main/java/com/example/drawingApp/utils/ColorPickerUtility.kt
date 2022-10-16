@@ -1,4 +1,4 @@
-package com.example.drawingApp.Utils
+package com.example.drawingApp.utils
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -8,10 +8,10 @@ import android.view.LayoutInflater
 import android.widget.TextView
 import androidx.core.widget.addTextChangedListener
 import com.example.drawingApp.*
-import com.example.drawingApp.CustomViews.ColorSlider
-import com.example.drawingApp.CustomViews.ForceEditText
-import com.example.drawingApp.CustomViews.GradientSquare
-import com.example.drawingApp.DataClasses.Hsv
+import com.example.drawingApp.customViews.ColorSlider
+import com.example.drawingApp.customViews.ForceEditText
+import com.example.drawingApp.customViews.GradientSquare
+import com.example.drawingApp.dataClasses.Hsv
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlin.math.max
 import kotlin.math.min

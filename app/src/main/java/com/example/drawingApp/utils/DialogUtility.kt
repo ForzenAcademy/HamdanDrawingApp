@@ -1,4 +1,4 @@
-package com.example.drawingApp.Utils
+package com.example.drawingApp.utils
 
 
 import android.content.Context

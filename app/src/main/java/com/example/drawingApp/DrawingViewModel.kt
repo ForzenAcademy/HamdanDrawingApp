@@ -3,7 +3,9 @@ package com.example.drawingApp
 import android.graphics.Bitmap
 import android.graphics.Color
 import androidx.lifecycle.ViewModel
-import com.example.drawingApp.DataClasses.Hsv
+import androidx.lifecycle.viewModelScope
+import com.example.drawingApp.dataClasses.Hsv
+import kotlinx.coroutines.CoroutineScope
 
 class DrawingViewModel : ViewModel() {
 
@@ -112,7 +114,7 @@ class DrawingViewModel : ViewModel() {
     }
 
     fun updateColorFromHsv() {
-        hsv.toColor()?.let {
+        hsv.toColor().let {
             activeColor = it
         }
     }
@@ -126,4 +128,9 @@ class DrawingViewModel : ViewModel() {
     fun setChosenColor(color: Int) {
         chosenColor = color
     }
+
+    fun getViewModelScope(): CoroutineScope {
+        return this.viewModelScope
+    }
+
 }

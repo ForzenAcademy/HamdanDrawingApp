@@ -4,13 +4,13 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal">
 
-    <com.example.drawingApp.CustomViews.GradientSquare
+    <com.example.drawingApp.customViews.GradientSquare
         android:id="@+id/gradientSquare"
         android:layout_width="200dp"
         android:layout_height="200dp"
         android:layout_margin="@dimen/pad_1" />
 
-    <com.example.drawingApp.CustomViews.ColorSlider
+    <com.example.drawingApp.customViews.ColorSlider
         android:id="@+id/slider"
         android:layout_width="20dp"
         android:layout_height="200dp"
@@ -45,7 +45,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/hue_H" />
 
-            <com.example.drawingApp.CustomViews.ForceEditText
+            <com.example.drawingApp.customViews.ForceEditText
                 android:id="@+id/hslH"
                 style="@style/Widget.AppCompat.EditText"
                 android:layout_width="wrap_content"
@@ -66,7 +66,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/saturation_S" />
 
-            <com.example.drawingApp.CustomViews.ForceEditText
+            <com.example.drawingApp.customViews.ForceEditText
                 android:id="@+id/hslS"
                 style="@style/Widget.AppCompat.EditText"
                 android:layout_width="wrap_content"
@@ -87,7 +87,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/value_V" />
 
-            <com.example.drawingApp.CustomViews.ForceEditText
+            <com.example.drawingApp.customViews.ForceEditText
                 android:id="@+id/hslV"
                 style="@style/Widget.AppCompat.EditText"
                 android:layout_width="wrap_content"
@@ -108,7 +108,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/rgb_red_R" />
 
-            <com.example.drawingApp.CustomViews.ForceEditText
+            <com.example.drawingApp.customViews.ForceEditText
                 android:id="@+id/rgbR"
                 style="@style/Widget.AppCompat.EditText"
                 android:layout_width="wrap_content"
@@ -129,7 +129,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/rgb_green_G" />
 
-            <com.example.drawingApp.CustomViews.ForceEditText
+            <com.example.drawingApp.customViews.ForceEditText
                 android:id="@+id/rgbG"
                 style="@style/Widget.AppCompat.EditText"
                 android:layout_width="wrap_content"
@@ -150,7 +150,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/rgb_blue_B" />
 
-            <com.example.drawingApp.CustomViews.ForceEditText
+            <com.example.drawingApp.customViews.ForceEditText
                 android:id="@+id/rgbB"
                 style="@style/Widget.AppCompat.EditText"
                 android:layout_width="wrap_content"
@@ -171,7 +171,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/hex_pound" />
 
-            <com.example.drawingApp.CustomViews.ForceEditText
+            <com.example.drawingApp.customViews.ForceEditText
                 android:id="@+id/colorHex"
                 style="@style/Widget.AppCompat.EditText"
                 android:layout_width="wrap_content"

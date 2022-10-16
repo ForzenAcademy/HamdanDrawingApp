@@ -1,4 +1,4 @@
-package com.example.drawingApp.DataClasses
+package com.example.drawingApp.dataClasses
 
 import android.graphics.Color
 
