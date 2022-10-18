@@ -12,7 +12,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.example.drawingApp.customViews.ColorCircleView
 import com.example.drawingApp.customViews.DrawingFieldView
-import com.example.drawingApp.dataClasses.Hsv
 import com.example.drawingApp.utils.ColorPickerUtility
 import com.example.drawingApp.utils.DialogUtility
 import com.example.drawingApp.utils.ImageUtility
@@ -24,6 +23,7 @@ class MainActivity : AppCompatActivity() {
 
     var botSheetObj: DialogUtility.SheetObject? = null
     var alertDialog: AlertDialog? = null
+    var deleteDialog: AlertDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,7 +53,7 @@ class MainActivity : AppCompatActivity() {
             model.circleColor = stateColor
             drawingFieldView.setPaintColor(stateColor)
         }
-        //whenever we recieve a need to update the state of the view
+        //whenever we receive a need to update the state of the view
         model.onUpdate = { state ->
 
             state.activeBitmap?.let {
@@ -67,20 +67,18 @@ class MainActivity : AppCompatActivity() {
                 else {
                     if (state.isLayerSheetOpen && state.isLayerDialogOpen) {
                         if (botSheetObj != null && alertDialog != null) {
-                            model.layerViewEditDialogIndex?.let { index ->
-                                layerText?.let { layerText ->
-                                    model.replaceLayer(index, layerText)
-                                    botSheetObj?.onEdit?.invoke(index, layerText)
+                            layerText?.let {
+                                model.submitLayerEditClicked(layerText)
+                                model.layerViewEditDialogIndex?.let {
+                                    botSheetObj?.onEdit?.invoke(it, layerText)
                                 }
                             }
                         }
                     } else {
-                        layerText?.let { model.addLayer(it) }
+                        layerText?.let { model.submitNewLayerClicked(it) }
                     }
                     alertDialog?.dismiss()
                     alertDialog = null
-                    model.currentLayerDialogText = ""
-                    model.closeAlertDialog()
                     true
                 }
             }
@@ -90,14 +88,15 @@ class MainActivity : AppCompatActivity() {
                     context = this,
                     layerNames = state.layers,
                     onEdit = {
-                        model.layerViewEditDialogIndex = it
-                        model.openAlertDialog()
+                        model.editLayerClicked(it)
                     },
-                    onDelete = { model.removeLayer(it) },
+                    onDelete = {
+                        model.deleteButtonClicked(it)
+                    },
                     onSheetDismiss = {
                         botSheetObj?.sheet?.dismiss()
                         botSheetObj = null
-                        model.closeLayersSheet()
+                        model.layerSheetCloseClicked()
                     }
                 )
             }
@@ -116,44 +115,58 @@ class MainActivity : AppCompatActivity() {
                 isColorSheetOpen = true
                 ColorPickerUtility.colorPickerSheet(context = this,
                     onColorUpdate = { hue, saturation, value ->
-                        val hsvHue = hue ?: model.getHsv().hue
-                        val hsvSat = saturation ?: model.getHsv().saturation
-                        val hsvVal = value ?: model.getHsv().value
-                        model.setHsv(Hsv(hsvHue, hsvSat, hsvVal))
-                        model.updateColorFromHsv()
+                        model.hsvColorUpdate(hue, saturation, value)
                     },
                     onColorTextForceUpdate = {
                         ColorPickerUtility.ColorPack(
-                            model.getHsv(),
+                            model.hsv,
                             previousColor = state.chosenColor,
                         )
                     },
                     onSubmission = { color ->
-                        val isNull = color == null
-                        color?.let {
-                            model.setChosenColor(it)
-                            Toast.makeText(this, "Chosen Color: $it", Toast.LENGTH_SHORT).show()
-                        }
+                        model.submitColorPickerClicked(color)
+                        if (color != null) Toast.makeText(
+                            this,
+                            "Chosen Color: $color",
+                            Toast.LENGTH_SHORT
+                        ).show()
                         isColorSheetOpen = false
-                        model.closeColorSheet(isNull)
                     }
                 )
             }
+            //if the delete dialog is open
+            if (state.isDeleteDialogOpen && deleteDialog == null) {
+                deleteDialog = DialogUtility.showDeleteDialog(
+                    context = this,
+                    onDismiss = {
+                        model.closeDeleteDialog()
+                        deleteDialog = null
+                    },
+                    onSubmission = {
+                        model.submitDeleteDialogClicked()
+                        model.layerViewEditDialogIndex?.let { index ->
+                            botSheetObj?.onDelete?.invoke(index)
+                        }
+                        deleteDialog = null
+                    }
+                )
+            }
+
             //used to persist the state of the color circle, and the actively drawn color
             colorCircleView.setColor(state.circleColor)
             colorCircleView.onColorChange?.let { it(state.circleColor) }
         }
 
         findViewById<TextView>(R.id.newLayer).setOnClickListener {
-            model.openAlertDialog()
+            model.newLayerClicked()
         }
 
         findViewById<TextView>(R.id.colorPickerBtn).setOnClickListener {
-            model.openColorSheet()
+            model.colorPickerClicked()
         }
 
         findViewById<TextView>(R.id.editLayer).setOnClickListener {
-            model.openLayersSheet()
+            model.layerListClicked()
         }
 
         model.initialize()
@@ -166,7 +179,7 @@ class MainActivity : AppCompatActivity() {
         contentLauncher.launch("image/*")
     }
 
-    fun hintText(layers: List<String>, refString: String): String {
+    private fun hintText(layers: List<String>, refString: String): String {
         if (refString != "") return refString
         var layerCounter = 1
         while (layers.contains(
