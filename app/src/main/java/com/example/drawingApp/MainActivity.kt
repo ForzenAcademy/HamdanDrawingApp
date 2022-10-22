@@ -55,11 +55,14 @@ class MainActivity : AppCompatActivity() {
         }
         //whenever we receive a need to update the state of the view
         model.onUpdate = { state ->
-
             state.activeBitmap?.let {
                 drawingFieldView.setBitmap(it)
                 drawingFieldView.invalidate()
             }
+            DialogUtility.tabSheetDialog(
+                findViewById(R.id.tabSheet),
+                onInit = { state.tabSheetState },
+                onStateChanged = { model.tabSheetSlide(it) })
             //based on the state of the sheet alertdialog being open or closed as well as if the
             //sheet is open or closed, change how the submission function of the dialog works
             onSubmission = { layerText ->
@@ -75,10 +78,13 @@ class MainActivity : AppCompatActivity() {
                             }
                         }
                     } else {
-                        layerText?.let { model.submitNewLayerClicked(it) }
+                        layerText?.let {
+                            model.submitNewLayerClicked(it)
+                        }
                     }
                     alertDialog?.dismiss()
                     alertDialog = null
+                    model.cancelLayerDialogClicked()
                     true
                 }
             }
@@ -168,6 +174,8 @@ class MainActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.editLayer).setOnClickListener {
             model.layerListClicked()
         }
+
+
 
         model.initialize()
     }
