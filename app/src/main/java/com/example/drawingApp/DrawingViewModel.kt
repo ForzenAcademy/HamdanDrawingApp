@@ -5,6 +5,7 @@ import android.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.drawingApp.dataClasses.Hsv
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.coroutines.CoroutineScope
 
 class DrawingViewModel : ViewModel() {
@@ -14,6 +15,7 @@ class DrawingViewModel : ViewModel() {
         val isLayerSheetOpen: Boolean,
         val isLayerDialogOpen: Boolean,
         val isDeleteDialogOpen: Boolean,
+        val tabSheetState: Int,
         val chosenColor: Int,
         val circleColor: Int,
         val layers: MutableList<String>,
@@ -30,6 +32,7 @@ class DrawingViewModel : ViewModel() {
     private var isDeleteDialogOpen = false //new delete dialog
     private var isViewingLayerSheetOpen = false       //edit layer
     private var _hsv = Hsv(0f, 0f, 0f)
+    private var tabSheetState = BottomSheetBehavior.STATE_COLLAPSED
 
     //used to help determine rgb values for consistency
     private var activeColor: Int = Color.BLACK
@@ -55,6 +58,7 @@ class DrawingViewModel : ViewModel() {
                 isLayerSheetOpen = isViewingLayerSheetOpen,
                 isLayerDialogOpen = isLayerDialogOpen,
                 isDeleteDialogOpen = isDeleteDialogOpen,
+                tabSheetState = tabSheetState,
                 chosenColor = chosenColor ?: Color.BLACK,
                 circleColor = circleColor,
                 layers = layerNames,
@@ -156,6 +160,11 @@ class DrawingViewModel : ViewModel() {
         layerViewEditDialogIndex?.let { replaceLayer(it, newString) }
     }
 
+    fun cancelLayerDialogClicked() {
+        currentLayerDialogText = ""
+        closeAlertDialog()
+    }
+
     //endregion
     //region close Click Functions
     fun layerSheetCloseClicked() {
@@ -215,7 +224,12 @@ class DrawingViewModel : ViewModel() {
         isViewingLayerSheetOpen = true
         updateViewState()
     }
+
     //endregion
+    fun tabSheetSlide(state: Int) {
+        tabSheetState = state
+        updateViewState()
+    }
 
     fun getViewModelScope(): CoroutineScope {
         return this.viewModelScope

@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <dimen name="drawing_field_height">300dp</dimen>
+    <dimen name="drawing_field_width">250dp</dimen>
+
+    <dimen name="icon_1">24dp</dimen>
+    <dimen name="icon_2">28dp</dimen>
+    <dimen name="icon_3">32dp</dimen>
+    <dimen name="icon_4">36dp</dimen>
+    <dimen name="icon_5">40dp</dimen>
+    <dimen name="icon_6">44dp</dimen>
+    <dimen name="icon_7">48dp</dimen>
+
     <dimen name="grid_1">4dp</dimen>
     <dimen name="grid_2">8dp</dimen>
     <dimen name="grid_3">12dp</dimen>
@@ -8,6 +19,13 @@
     <dimen name="grid_6">24dp</dimen>
     <dimen name="grid_7">28dp</dimen>
     <dimen name="grid_gigachad">32dp</dimen>
+
+    <dimen name="peak_height_1">80dp</dimen>
+    <dimen name="peak_height_2">84dp</dimen>
+    <dimen name="peak_height_3">88dp</dimen>
+    <dimen name="peak_height_4">92dp</dimen>
+    <dimen name="peak_height_5">96dp</dimen>
+    <dimen name="peak_height_6">100dp</dimen>
 
     <dimen name="pad_1">10dp</dimen>
     <dimen name="pad_2">20dp</dimen>

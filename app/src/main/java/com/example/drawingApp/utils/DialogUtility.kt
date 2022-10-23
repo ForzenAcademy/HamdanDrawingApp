@@ -3,7 +3,9 @@ package com.example.drawingApp.utils
 
 import android.content.Context
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.EditText
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -14,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.drawingApp.EditLayerAdapter
 import com.example.drawingApp.LayerViewModel
 import com.example.drawingApp.R
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 
 object DialogUtility {
@@ -29,6 +32,65 @@ object DialogUtility {
         val onEdit: (Int, String) -> Unit,
         val onDelete: (Int) -> Unit
     )
+
+    data class SheetTool(
+        val btn: Int, val body: Int, val tool: ToolEnum
+    )
+
+    //will be used
+    enum class ToolEnum {
+        Gradient, Brush, Move, Resize, Filters, Layers
+    }
+
+    fun tabSheetDialog(
+        view: LinearLayout,
+        /**
+         * used to set the initial state of the tab, primarily used for maintaining in rotation
+         * also used to decide if the state needs to be updated in the view
+         */
+        onInit: () -> Int,
+        /**
+         * called whenever the state should be changed, this should set wherever we are keeping the behavior state of the tab
+         */
+        onStateChanged: (state: Int) -> Unit
+    ) {
+        val behavior = BottomSheetBehavior.from(view)
+        val tools = listOf(
+            SheetTool(R.id.colorGradientBtn, R.id.hideableGrade, ToolEnum.Gradient),
+            SheetTool(R.id.brushSettingsBtn, R.id.hideableBrush, ToolEnum.Brush),
+            SheetTool(R.id.moveImageBtn, R.id.hideableMove, ToolEnum.Move),
+            SheetTool(R.id.resizeBtn, R.id.hideableResize, ToolEnum.Resize),
+            SheetTool(R.id.filtersBtn, R.id.hideableFilter, ToolEnum.Filters),
+            SheetTool(R.id.layersBtn, R.id.hideableLayer, ToolEnum.Layers)
+        )
+        val onSheetButtonClicked: (tool: SheetTool) -> Unit = {
+            showTabContent(view, tools, it)
+            behavior.state = BottomSheetBehavior.STATE_EXPANDED
+        }
+        val initState = onInit()
+        behavior.state = initState
+        tools.forEach { tool ->
+            view.findViewById<View>(tool.btn).setOnClickListener {
+                onSheetButtonClicked(tool)
+            }
+        }
+        behavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+                if (newState == BottomSheetBehavior.STATE_EXPANDED || newState == BottomSheetBehavior.STATE_COLLAPSED) {
+                    if (newState != initState) onStateChanged(newState)
+                }
+            }
+
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {
+            }
+        })
+    }
+
+    fun showTabContent(view: View, tools: List<SheetTool>, tool: SheetTool) {
+        tools.forEach {
+            view.findViewById<View>(it.body).isVisible = (it == tool)
+        }
+    }
 
     /**
      * opens a dialog that will take a string and allows you to interact with the string
@@ -100,7 +162,9 @@ object DialogUtility {
             }
         }
 
-        dialog.setOnDismissListener { onDialogSubmission(null) }
+        dialog.setOnDismissListener {
+            onDialogSubmission(null)
+        }
         dialog.show()
         return dialog
     }

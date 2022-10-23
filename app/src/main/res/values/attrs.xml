@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <attr name="standardErrorText" format="color" />
-
+    <attr name="selectedTabColorHamdan" format="color" />
+    <attr name="dragHandleColorHamdan" format="color" />
+    <attr name="tabBackgroundColorHamdan" format="color" />
 </resources>
