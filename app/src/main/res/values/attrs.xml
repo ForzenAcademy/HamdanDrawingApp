@@ -4,4 +4,5 @@
     <attr name="selectedTabColorHamdan" format="color" />
     <attr name="dragHandleColorHamdan" format="color" />
     <attr name="tabBackgroundColorHamdan" format="color" />
+    <attr name="foregroundColorHamdan" format="color" />
 </resources>

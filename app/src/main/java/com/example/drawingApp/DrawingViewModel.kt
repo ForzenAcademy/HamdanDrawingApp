@@ -5,6 +5,7 @@ import android.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.drawingApp.dataClasses.Hsv
+import com.example.drawingApp.utils.DialogUtility
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.coroutines.CoroutineScope
 
@@ -15,7 +16,7 @@ class DrawingViewModel : ViewModel() {
         val isLayerSheetOpen: Boolean,
         val isLayerDialogOpen: Boolean,
         val isDeleteDialogOpen: Boolean,
-        val tabSheetState: Int,
+        val tabSheetState: DialogUtility.TabState,
         val chosenColor: Int,
         val circleColor: Int,
         val layers: MutableList<String>,
@@ -32,7 +33,17 @@ class DrawingViewModel : ViewModel() {
     private var isDeleteDialogOpen = false //new delete dialog
     private var isViewingLayerSheetOpen = false       //edit layer
     private var _hsv = Hsv(0f, 0f, 0f)
-    private var tabSheetState = BottomSheetBehavior.STATE_COLLAPSED
+    private var tabSheetState =
+        DialogUtility.TabState(
+            BottomSheetBehavior.STATE_COLLAPSED,
+            DialogUtility.SheetTool(
+                btn = R.id.colorGradientBtn,
+                btnTab = R.id.colorGradientTab,
+                body = R.id.colorPickerLayout,
+                tool = DialogUtility.ToolEnum.Gradient
+            ),
+            false
+        )
 
     //used to help determine rgb values for consistency
     private var activeColor: Int = Color.BLACK
@@ -71,6 +82,7 @@ class DrawingViewModel : ViewModel() {
 
     fun initialize() {
         if (layerNames.isEmpty()) layerNames.add("Layer 1")
+        tabSheetState = tabSheetState.copy(isInitialized = false)
         updateViewState()
     }
 
@@ -226,10 +238,15 @@ class DrawingViewModel : ViewModel() {
     }
 
     //endregion
-    fun tabSheetSlide(state: Int) {
+    fun tabSheetChange(state: DialogUtility.TabState) {
         tabSheetState = state
         updateViewState()
     }
+
+    fun tabSheetSlide(): DialogUtility.SheetTool {
+        return tabSheetState.selectedTool
+    }
+
 
     fun getViewModelScope(): CoroutineScope {
         return this.viewModelScope

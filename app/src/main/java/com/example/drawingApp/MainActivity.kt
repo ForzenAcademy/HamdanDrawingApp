@@ -15,11 +15,13 @@ import com.example.drawingApp.customViews.DrawingFieldView
 import com.example.drawingApp.utils.ColorPickerUtility
 import com.example.drawingApp.utils.DialogUtility
 import com.example.drawingApp.utils.ImageUtility
+import com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback
 
 
 class MainActivity : AppCompatActivity() {
     private val model: DrawingViewModel by viewModels()
     private var isColorSheetOpen = false
+    private var callbacksList = mutableListOf<BottomSheetCallback>()
 
     var botSheetObj: DialogUtility.SheetObject? = null
     var alertDialog: AlertDialog? = null
@@ -61,8 +63,10 @@ class MainActivity : AppCompatActivity() {
             }
             DialogUtility.tabSheetDialog(
                 findViewById(R.id.tabSheet),
-                onInit = { state.tabSheetState },
-                onStateChanged = { model.tabSheetSlide(it) })
+                state = state.tabSheetState,
+                onSheetStateChanged = { model.tabSheetChange(it) },
+                onSheetSlide = { model.tabSheetSlide() }
+            )
             //based on the state of the sheet alertdialog being open or closed as well as if the
             //sheet is open or closed, change how the submission function of the dialog works
             onSubmission = { layerText ->
