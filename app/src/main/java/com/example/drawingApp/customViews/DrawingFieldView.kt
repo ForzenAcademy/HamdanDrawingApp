@@ -62,7 +62,7 @@ class DrawingFieldView @JvmOverloads constructor(
             invalidate()
         }
         if (resize && scope != null) {
-            scope?.launch(Dispatchers.IO) {
+            scope.launch(Dispatchers.IO) {
                 canvasBitmap = Bitmap.createScaledBitmap(imageBitmap, width, height, true)
                 finish()
             }
@@ -105,7 +105,6 @@ class DrawingFieldView @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
-
         canvas?.let { c ->
             if (canvasBitmap == null) {
                 canvasBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
