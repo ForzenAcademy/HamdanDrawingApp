@@ -3,13 +3,16 @@
     <dimen name="drawing_field_height">300dp</dimen>
     <dimen name="drawing_field_width">250dp</dimen>
 
-    <dimen name="icon_1">24dp</dimen>
-    <dimen name="icon_2">28dp</dimen>
-    <dimen name="icon_3">32dp</dimen>
-    <dimen name="icon_4">36dp</dimen>
-    <dimen name="icon_5">40dp</dimen>
-    <dimen name="icon_6">44dp</dimen>
-    <dimen name="icon_7">48dp</dimen>
+
+    <dimen name="icon_1">16dp</dimen>
+    <dimen name="icon_2">20dp</dimen>
+    <dimen name="icon_3">24dp</dimen>
+    <dimen name="icon_4">28dp</dimen>
+    <dimen name="icon_5">32dp</dimen>
+    <dimen name="icon_6">36dp</dimen>
+    <dimen name="icon_7">40dp</dimen>
+    <dimen name="icon_8">44dp</dimen>
+    <dimen name="icon_9">48dp</dimen>
 
     <dimen name="grid_1">4dp</dimen>
     <dimen name="grid_2">8dp</dimen>

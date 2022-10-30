@@ -9,7 +9,7 @@
     android:padding="@dimen/grid_3"
     android:weightSum="20"
     app:behavior_hideable="false"
-    app:behavior_peekHeight="@dimen/peak_height_4"
+    app:behavior_peekHeight="@dimen/peak_height_1"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
     <TextView
@@ -17,13 +17,14 @@
         android:layout_height="@dimen/grid_1"
         android:layout_gravity="center"
         android:layout_marginTop="@dimen/grid_1"
-        android:layout_marginBottom="@dimen/grid_7"
+        android:layout_marginBottom="@dimen/grid_3"
         android:background="?dragHandleColorHamdan" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingBottom="@dimen/grid_gigachad">
 
         <FrameLayout
             android:id="@+id/colorGradientBtn"
@@ -33,107 +34,197 @@
 
             <FrameLayout
                 android:id="@+id/colorGradientTab"
-                android:layout_width="@dimen/icon_6"
-                android:layout_height="@dimen/icon_6"
+                android:layout_width="@dimen/icon_5"
+                android:layout_height="@dimen/icon_5"
                 android:layout_gravity="center"
                 android:background="@drawable/color_button"
-                android:backgroundTint="?selectedTabColorHamdan">
+                android:backgroundTint="@color/white">
 
                 <ImageView
-                    android:layout_width="@dimen/icon_2"
-                    android:layout_height="@dimen/icon_2"
+                    android:layout_width="@dimen/icon_3"
+                    android:layout_height="@dimen/icon_3"
                     android:layout_gravity="center"
                     android:src="@drawable/color_button" />
 
                 <ImageView
-                    android:id="@+id/colorGradientBtnColor"
-                    android:layout_width="wrap_content"
-                    android:layout_height="@dimen/icon_4"
+                    android:id="@+id/colorGradientColor"
+                    android:layout_width="@dimen/icon_2"
+                    android:layout_height="@dimen/icon_2"
                     android:layout_gravity="center"
                     android:src="@drawable/color_button"
                     app:tint="@color/purple_200" />
             </FrameLayout>
         </FrameLayout>
 
-
-        <ImageView
+        <FrameLayout
             android:id="@+id/brushSettingsBtn"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:src="@drawable/ic_baseline_brush_24" />
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
 
-        <ImageView
+            <FrameLayout
+                android:id="@+id/brushSettingsTab"
+                android:layout_width="@dimen/icon_5"
+                android:layout_height="@dimen/icon_5"
+                android:layout_gravity="center"
+                android:background="@drawable/color_button"
+                android:backgroundTint="@color/white">
+
+                <ImageView
+                    android:layout_width="@dimen/icon_3"
+                    android:layout_height="@dimen/icon_3"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_baseline_brush_24" />
+            </FrameLayout>
+        </FrameLayout>
+
+
+        <FrameLayout
             android:id="@+id/moveImageBtn"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:src="@drawable/ic_baseline_open_with_24" />
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
 
-        <ImageView
+            <FrameLayout
+                android:id="@+id/moveImageTab"
+                android:layout_width="@dimen/icon_5"
+                android:layout_height="@dimen/icon_5"
+                android:layout_gravity="center"
+                android:background="@drawable/color_button"
+                android:backgroundTint="@color/white">
+
+                <ImageView
+                    android:layout_width="@dimen/icon_3"
+                    android:layout_height="@dimen/icon_3"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_baseline_open_with_24" />
+            </FrameLayout>
+        </FrameLayout>
+
+        <FrameLayout
             android:id="@+id/resizeBtn"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:src="@drawable/ic_baseline_close_fullscreen_24" />
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
 
-        <ImageView
+            <FrameLayout
+                android:id="@+id/resizeTab"
+                android:layout_width="@dimen/icon_5"
+                android:layout_height="@dimen/icon_5"
+                android:layout_gravity="center"
+                android:background="@drawable/color_button"
+                android:backgroundTint="@color/white">
+
+                <ImageView
+                    android:layout_width="@dimen/icon_3"
+                    android:layout_height="@dimen/icon_3"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_baseline_close_fullscreen_24" />
+            </FrameLayout>
+        </FrameLayout>
+
+        <FrameLayout
             android:id="@+id/filtersBtn"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:src="@drawable/ic_baseline_auto_fix_high_24" />
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
 
-        <ImageView
+            <FrameLayout
+                android:id="@+id/filtersTab"
+                android:layout_width="@dimen/icon_5"
+                android:layout_height="@dimen/icon_5"
+                android:layout_gravity="center"
+                android:background="@drawable/color_button"
+                android:backgroundTint="@color/white">
+
+                <ImageView
+                    android:layout_width="@dimen/icon_3"
+                    android:layout_height="@dimen/icon_3"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_baseline_auto_fix_high_24" />
+            </FrameLayout>
+        </FrameLayout>
+
+
+        <FrameLayout
             android:id="@+id/layersBtn"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:src="@drawable/ic_baseline_layers_24" />
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
 
+            <FrameLayout
+                android:id="@+id/layersTab"
+                android:layout_width="@dimen/icon_5"
+                android:layout_height="@dimen/icon_5"
+                android:layout_gravity="center"
+                android:background="@drawable/color_button"
+                android:backgroundTint="@color/white">
+
+                <ImageView
+                    android:layout_width="@dimen/icon_3"
+                    android:layout_height="@dimen/icon_3"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_baseline_layers_24" />
+            </FrameLayout>
+        </FrameLayout>
     </LinearLayout>
+
+    <!-- Header buttons end here, now its the body of the xml -->
 
     <TextView
         android:id="@+id/hideableGrade"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="@dimen/grid_gigachad"
+        android:background="#aaaaaa"
         android:textSize="100sp"
-        android:visibility="gone"
-        android:text="Gradient"/>
+        android:visibility="gone" />
+
+    <include layout="@layout/color_picker_bottom_sheet" />
+
     <TextView
         android:id="@+id/hideableBrush"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="@dimen/grid_gigachad"
+        android:background="#aaaaaa"
         android:textSize="100sp"
-        android:visibility="gone"
-        android:text="Brush"/>
+        android:visibility="gone" />
+
     <TextView
         android:id="@+id/hideableMove"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="@dimen/grid_gigachad"
+        android:background="#aaaaaa"
         android:textSize="100sp"
-        android:visibility="gone"
-        android:text="Move"/>
+        android:visibility="gone" />
+
     <TextView
         android:id="@+id/hideableResize"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="@dimen/grid_gigachad"
+        android:background="#aaaaaa"
         android:textSize="100sp"
-        android:visibility="gone"
-        android:text="resize"/>
+        android:visibility="gone" />
+
     <TextView
         android:id="@+id/hideableFilter"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="@dimen/grid_gigachad"
+        android:background="#aaaaaa"
         android:textSize="100sp"
-        android:visibility="gone"
-        android:text="filter"/>
+        android:visibility="gone" />
+
     <TextView
         android:id="@+id/hideableLayer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="@dimen/grid_gigachad"
+        android:background="#aaaaaa"
         android:textSize="100sp"
-        android:visibility="gone"
-        android:text="layer"/>
+        android:visibility="gone" />
 
 </LinearLayout>

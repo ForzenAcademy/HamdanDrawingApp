@@ -16,6 +16,7 @@
         <item name="dragHandleColorHamdan">#aaaaaa</item>
         <item name="tabBackgroundColorHamdan">#ffffff</item>
         <item name="selectedTabColorHamdan">#aaaaaa</item>
+        <item name="foregroundColorHamdan">#aaaaaa</item>
     </style>
 
 </resources>
