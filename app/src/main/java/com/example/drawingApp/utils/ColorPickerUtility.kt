@@ -1,18 +1,17 @@
 package com.example.drawingApp.utils
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.graphics.Color
 import android.util.Log
-import android.view.LayoutInflater
+import android.view.View
 import android.widget.TextView
 import androidx.core.widget.addTextChangedListener
-import com.example.drawingApp.*
+import com.example.drawingApp.R
 import com.example.drawingApp.customViews.ColorSlider
 import com.example.drawingApp.customViews.ForceEditText
 import com.example.drawingApp.customViews.GradientSquare
 import com.example.drawingApp.dataClasses.Hsv
-import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlin.math.max
 import kotlin.math.min
 
@@ -33,7 +32,6 @@ object ColorPickerUtility {
 
     @SuppressLint("ClickableViewAccessibility")
     fun colorPickerSheet(
-        context: Context,
         /**
          * Called whenever the hue is updated via text or slider.
          * Use it to set wherever you are storing your hue
@@ -52,11 +50,13 @@ object ColorPickerUtility {
          * on actual submission the color will not be null so take it in and set it wherever you need the selected color and set the hsv and rgb fields to defaults.
          * on null don't do anything with it, don't set rgb and hsv to defaults.
          */
-        onSubmission: (Int?) -> Unit
+        onSubmission: (Int?) -> Unit,
+        /**
+         * BottomSheet view, either use a bottomsheet or use a view acting as a bottomsheet for the view
+         */
+        view: View,
     ) {
-        val sheet = BottomSheetDialog(context)
-        val inflater = LayoutInflater.from(context)
-        val view = inflater.inflate(R.layout.color_picker_bottom_sheet, null)
+        val behavior = BottomSheetBehavior.from(view)
         val submit = view.findViewById<TextView>(R.id.dialogSubmit)
         val cancel = view.findViewById<TextView>(R.id.dialogCancel)
         val hueView = view.findViewById<ForceEditText>(R.id.hslH)
@@ -70,7 +70,7 @@ object ColorPickerUtility {
         val square = view.findViewById<GradientSquare>(R.id.gradientSquare)
         val activeColorBox = view.findViewById<TextView>(R.id.colorOne)
         val previousColorBox = view.findViewById<TextView>(R.id.colorTwo)
-        val previousColor = onColorTextForceUpdate().previousColor
+        var previousColor = onColorTextForceUpdate().previousColor
         previousColorBox.setBackgroundColor(previousColor)
         //used to set the color of the active box
         val onSettingActiveBox: (Hsv) -> Unit = { hsv ->
@@ -110,15 +110,15 @@ object ColorPickerUtility {
             onSettingActiveBox(Hsv.fromColorToHsv(previousColor))
         }
         submit.setOnClickListener {
-            onSubmission(
-                Hsv(slider.hue, square.saturation, square.value).toColor()
-            )
-            sheet.dismiss()
+            val submitColor = Hsv(slider.hue, square.saturation, square.value).toColor()
+            onSubmission(submitColor)
+            previousColor = submitColor
+            previousColorBox.setBackgroundColor(previousColor)
+            behavior.state = BottomSheetBehavior.STATE_COLLAPSED
         }
         cancel.setOnClickListener {
-            sheet.dismiss()
+            behavior.state = BottomSheetBehavior.STATE_COLLAPSED
         }
-
         slider.onHueChange = {
             square.hue = it
             slider.sliderSetHue(it)
@@ -133,10 +133,10 @@ object ColorPickerUtility {
             updateForceViews()
         }
         //used to prevent dragging while interacting with either gradient or slider
-        square.onDown = { sheet.behavior.isDraggable = false }
-        square.onUp = { sheet.behavior.isDraggable = true }
-        slider.onDown = { sheet.behavior.isDraggable = false }
-        slider.onUp = { sheet.behavior.isDraggable = true }
+        square.onDown = { behavior.isDraggable = false }
+        square.onUp = { behavior.isDraggable = true }
+        slider.onDown = { behavior.isDraggable = false }
+        slider.onUp = { behavior.isDraggable = true }
 
         hueView.addTextChangedListener {
             val hue = hueView.text.toString().toFloatOrNull()
@@ -157,6 +157,7 @@ object ColorPickerUtility {
             }
         }
         valueView.addTextChangedListener {
+
             val value = valueView.text.toString().toFloatOrNull()
                 ?.let { string -> max(min(1f, string / SAT_VAL_FACTOR), 0f) }
             value?.let {
@@ -193,11 +194,6 @@ object ColorPickerUtility {
         }
 
         updateForceViews()
-        sheet.setOnDismissListener {
-            onSubmission(null)
-        }
-        sheet.setContentView(view)
-        sheet.show()
     }
 
 }

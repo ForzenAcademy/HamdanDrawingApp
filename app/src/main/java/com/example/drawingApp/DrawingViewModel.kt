@@ -28,7 +28,7 @@ class DrawingViewModel : ViewModel() {
     private val layerNames: MutableList<String> = mutableListOf()
 
     private var isColorPickerSheetOpen = false
-    private var chosenColor: Int? = null
+    private var chosenColor: Int = Color.BLACK
     private var isLayerDialogOpen = false   //new dialog
     private var isDeleteDialogOpen = false //new delete dialog
     private var isViewingLayerSheetOpen = false       //edit layer
@@ -108,6 +108,7 @@ class DrawingViewModel : ViewModel() {
 
     private fun setChosenColor(color: Int) {
         chosenColor = color
+        updateViewState()
     }
 
     var currentLayerDialogText: String?
@@ -143,10 +144,6 @@ class DrawingViewModel : ViewModel() {
         layerViewEditDialogIndex = index
         isLayerDialogOpen = true
         updateViewState()
-    }
-
-    fun colorPickerClicked() {
-        openColorSheet()
     }
 
     //region submitClickFunctions
@@ -186,10 +183,6 @@ class DrawingViewModel : ViewModel() {
 
     //endregion
     //region clicked functions Utilities
-    private fun openColorSheet() {
-        isColorPickerSheetOpen = true
-        updateViewState()
-    }
 
     private fun closeColorSheet(isNotSubmitted: Boolean) {
         isColorPickerSheetOpen = false
@@ -246,7 +239,7 @@ class DrawingViewModel : ViewModel() {
     fun tabSheetSlide(): DialogUtility.SheetTool {
         return tabSheetState.selectedTool
     }
-    
+
     fun getViewModelScope(): CoroutineScope {
         return this.viewModelScope
     }
