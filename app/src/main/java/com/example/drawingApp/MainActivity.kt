@@ -1,8 +1,11 @@
 package com.example.drawingApp
 
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.os.Bundle
 import android.os.StrictMode
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
@@ -10,18 +13,14 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import com.example.drawingApp.customViews.ColorCircleView
 import com.example.drawingApp.customViews.DrawingFieldView
 import com.example.drawingApp.utils.ColorPickerUtility
 import com.example.drawingApp.utils.DialogUtility
 import com.example.drawingApp.utils.ImageUtility
-import com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback
 
 
 class MainActivity : AppCompatActivity() {
     private val model: DrawingViewModel by viewModels()
-    private var isColorSheetOpen = false
-    private var callbacksList = mutableListOf<BottomSheetCallback>()
 
     var botSheetObj: DialogUtility.SheetObject? = null
     var alertDialog: AlertDialog? = null
@@ -31,7 +30,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         enableStrictMode()
-        val colorCircleView = findViewById<ColorCircleView>(R.id.colorCircle)
         val drawingFieldView = findViewById<DrawingFieldView>(R.id.drawField)
         val getGalleryImageView = findViewById<ImageView>(R.id.getImageButton)
         var onSubmission: (String?) -> Boolean
@@ -44,6 +42,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+        var stateColor = Color.BLACK
 
         getGalleryImageView.setOnClickListener {
             launchGalleryImageGetter(imageContent)
@@ -51,22 +50,24 @@ class MainActivity : AppCompatActivity() {
         drawingFieldView.onBitmapUpdate = {
             model.activeBitmap = it
         }
-        colorCircleView.onColorChange = { stateColor ->
-            model.circleColor = stateColor
-            drawingFieldView.setPaintColor(stateColor)
-        }
         //whenever we receive a need to update the state of the view
         model.onUpdate = { state ->
+            stateColor = state.chosenColor
+
             state.activeBitmap?.let {
                 drawingFieldView.setBitmap(it)
                 drawingFieldView.invalidate()
             }
+            drawingFieldView.setPaintColor(state.chosenColor)
             DialogUtility.tabSheetDialog(
                 findViewById(R.id.tabSheet),
                 state = state.tabSheetState,
                 onSheetStateChanged = { model.tabSheetChange(it) },
-                onSheetSlide = { model.tabSheetSlide() }
+                onSheetSlide = { model.tabSheetSlide() },
             )
+            //sets the color of the gradient tab button
+            findViewById<LinearLayout>(R.id.tabSheet).findViewById<ImageView>(R.id.colorGradientColor).imageTintList =
+                ColorStateList.valueOf(state.chosenColor)
             //based on the state of the sheet alertdialog being open or closed as well as if the
             //sheet is open or closed, change how the submission function of the dialog works
             onSubmission = { layerText ->
@@ -120,30 +121,6 @@ class MainActivity : AppCompatActivity() {
                     onDialogSubmission = onSubmission,
                 )
             }
-            //if the gradient is supposed to be open, open it with the previous state it was in
-            if (state.isColorSheetOpen && !isColorSheetOpen) {
-                isColorSheetOpen = true
-                ColorPickerUtility.colorPickerSheet(context = this,
-                    onColorUpdate = { hue, saturation, value ->
-                        model.hsvColorUpdate(hue, saturation, value)
-                    },
-                    onColorTextForceUpdate = {
-                        ColorPickerUtility.ColorPack(
-                            model.hsv,
-                            previousColor = state.chosenColor,
-                        )
-                    },
-                    onSubmission = { color ->
-                        model.submitColorPickerClicked(color)
-                        if (color != null) Toast.makeText(
-                            this,
-                            "Chosen Color: $color",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        isColorSheetOpen = false
-                    }
-                )
-            }
             //if the delete dialog is open
             if (state.isDeleteDialogOpen && deleteDialog == null) {
                 deleteDialog = DialogUtility.showDeleteDialog(
@@ -161,25 +138,36 @@ class MainActivity : AppCompatActivity() {
                     }
                 )
             }
-
-            //used to persist the state of the color circle, and the actively drawn color
-            colorCircleView.setColor(state.circleColor)
-            colorCircleView.onColorChange?.let { it(state.circleColor) }
         }
 
         findViewById<TextView>(R.id.newLayer).setOnClickListener {
             model.newLayerClicked()
         }
 
-        findViewById<TextView>(R.id.colorPickerBtn).setOnClickListener {
-            model.colorPickerClicked()
-        }
-
         findViewById<TextView>(R.id.editLayer).setOnClickListener {
             model.layerListClicked()
         }
 
-
+        ColorPickerUtility.colorPickerSheet(
+            onColorUpdate = { hue, saturation, value ->
+                model.hsvColorUpdate(hue, saturation, value)
+            },
+            onColorTextForceUpdate = {
+                ColorPickerUtility.ColorPack(
+                    model.hsv,
+                    previousColor = stateColor,
+                )
+            },
+            onSubmission = { color ->
+                model.submitColorPickerClicked(color)
+                if (color != null) Toast.makeText(
+                    this,
+                    "Chosen Color: $color",
+                    Toast.LENGTH_SHORT
+                ).show()
+            },
+            view = findViewById<LinearLayout>(R.id.tabSheet)
+        )
 
         model.initialize()
     }

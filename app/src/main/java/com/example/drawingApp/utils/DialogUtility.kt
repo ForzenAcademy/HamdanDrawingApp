@@ -1,6 +1,5 @@
 package com.example.drawingApp.utils
 
-
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
@@ -68,9 +67,8 @@ object DialogUtility {
         /**
          * used to gurantee correct tool is selected when sliding up or down
          */
-        onSheetSlide: () -> SheetTool
+        onSheetSlide: () -> SheetTool,
     ) {
-
         val behavior = BottomSheetBehavior.from(view)
         var selectedTool = state.selectedTool
         behavior.state = state.tabState
