@@ -33,17 +33,11 @@ class DrawingViewModel : ViewModel() {
     private var isDeleteDialogOpen = false //new delete dialog
     private var isViewingLayerSheetOpen = false       //edit layer
     private var _hsv = Hsv(0f, 0f, 0f)
-    private var tabSheetState =
-        DialogUtility.TabState(
-            BottomSheetBehavior.STATE_COLLAPSED,
-            DialogUtility.SheetTool(
-                btn = R.id.colorGradientBtn,
-                btnTab = R.id.colorGradientTab,
-                body = R.id.colorPickerLayout,
-                tool = DialogUtility.ToolEnum.Gradient
-            ),
-            false
-        )
+    private var tabSheetState = DialogUtility.TabState(
+        BottomSheetBehavior.STATE_COLLAPSED,
+        DialogUtility.ToolEnum.Gradient,
+        false
+    )
 
     //used to help determine rgb values for consistency
     private var activeColor: Int = Color.BLACK
@@ -236,7 +230,7 @@ class DrawingViewModel : ViewModel() {
         updateViewState()
     }
 
-    fun tabSheetSlide(): DialogUtility.SheetTool {
+    fun tabSheetSlide(): DialogUtility.ToolEnum {
         return tabSheetState.selectedTool
     }
 

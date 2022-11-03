@@ -80,7 +80,9 @@
             android:layout_gravity="bottom"
             android:layout_weight=".8">
 
-            <include layout="@layout/tab_sheet" />
+            <include
+                android:id="@+id/tabSheetMain"
+                layout="@layout/tab_sheet" />
         </androidx.coordinatorlayout.widget.CoordinatorLayout>
     </LinearLayout>
 

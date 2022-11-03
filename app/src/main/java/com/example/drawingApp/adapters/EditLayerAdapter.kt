@@ -1,11 +1,9 @@
 package com.example.drawingApp
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.drawingApp.databinding.EditLayerDialogBinding
 
 class EditLayerAdapter(
     private val data: List<LayerViewModel>,
@@ -24,11 +22,12 @@ class EditLayerAdapter(
 ) : RecyclerView.Adapter<ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val inflater = LayoutInflater.from(parent.context)
+        val rowBinding =
+            EditLayerDialogBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return LayerViewHolder(
-            inflater.inflate(R.layout.edit_layer_dialog, parent, false),
+            rowBinding,
             onEditClick,
-            onDeleteClick
+            onDeleteClick,
         )
     }
 
@@ -42,22 +41,23 @@ class EditLayerAdapter(
 
 class LayerViewModel(val text: String)
 
-abstract class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+abstract class ViewHolder(rowBinding: EditLayerDialogBinding) :
+    RecyclerView.ViewHolder(rowBinding.root) {
     abstract fun bind(model: LayerViewModel)
 }
 
 class LayerViewHolder(
-    val view: View,
+    val binding: EditLayerDialogBinding,
     val onEdit: (LayerViewModel) -> Unit,
-    val onDelete: (LayerViewModel) -> Unit
-) : ViewHolder(view) {
+    val onDelete: (LayerViewModel) -> Unit,
+) : ViewHolder(binding) {
 
     override fun bind(model: LayerViewModel) {
-        view.findViewById<TextView>(R.id.editLayerName).text = model.text
-        view.findViewById<ImageView>(R.id.layerEditBtn).setOnClickListener {
+        binding.editLayerName.text = model.text
+        binding.layerEditBtn.setOnClickListener {
             onEdit(model)
         }
-        view.findViewById<ImageView>(R.id.layerDeleteBtn).setOnClickListener {
+        binding.layerDeleteBtn.setOnClickListener {
             onDelete(model)
         }
     }

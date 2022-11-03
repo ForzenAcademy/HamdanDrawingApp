@@ -4,16 +4,13 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
 import android.os.StrictMode
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import com.example.drawingApp.customViews.DrawingFieldView
+import com.example.drawingApp.databinding.ActivityMainBinding
 import com.example.drawingApp.utils.ColorPickerUtility
 import com.example.drawingApp.utils.DialogUtility
 import com.example.drawingApp.utils.ImageUtility
@@ -21,6 +18,7 @@ import com.example.drawingApp.utils.ImageUtility
 
 class MainActivity : AppCompatActivity() {
     private val model: DrawingViewModel by viewModels()
+    private lateinit var binding: ActivityMainBinding
 
     var botSheetObj: DialogUtility.SheetObject? = null
     var alertDialog: AlertDialog? = null
@@ -28,10 +26,12 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
         enableStrictMode()
-        val drawingFieldView = findViewById<DrawingFieldView>(R.id.drawField)
-        val getGalleryImageView = findViewById<ImageView>(R.id.getImageButton)
+        val drawingFieldView = binding.drawField
+        val getGalleryImageView = binding.getImageButton
         var onSubmission: (String?) -> Boolean
         val imageContent = registerForActivityResult(ActivityResultContracts.GetContent()) {
             it?.let { uri ->
@@ -60,13 +60,13 @@ class MainActivity : AppCompatActivity() {
             }
             drawingFieldView.setPaintColor(state.chosenColor)
             DialogUtility.tabSheetDialog(
-                findViewById(R.id.tabSheet),
+                //tabBinding.tabSheet,
+                binding.tabSheetMain,
                 state = state.tabSheetState,
                 onSheetStateChanged = { model.tabSheetChange(it) },
-                onSheetSlide = { model.tabSheetSlide() },
-            )
+            ) { model.tabSheetSlide() }
             //sets the color of the gradient tab button
-            findViewById<LinearLayout>(R.id.tabSheet).findViewById<ImageView>(R.id.colorGradientColor).imageTintList =
+            binding.tabSheetMain.colorGradientColor.imageTintList =
                 ColorStateList.valueOf(state.chosenColor)
             //based on the state of the sheet alertdialog being open or closed as well as if the
             //sheet is open or closed, change how the submission function of the dialog works
@@ -140,11 +140,11 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        findViewById<TextView>(R.id.newLayer).setOnClickListener {
+        binding.newLayer.setOnClickListener {
             model.newLayerClicked()
         }
 
-        findViewById<TextView>(R.id.editLayer).setOnClickListener {
+        binding.editLayer.setOnClickListener {
             model.layerListClicked()
         }
 
@@ -166,7 +166,7 @@ class MainActivity : AppCompatActivity() {
                     Toast.LENGTH_SHORT
                 ).show()
             },
-            view = findViewById<LinearLayout>(R.id.tabSheet)
+            tabSheetBinding = binding.tabSheetMain
         )
 
         model.initialize()
