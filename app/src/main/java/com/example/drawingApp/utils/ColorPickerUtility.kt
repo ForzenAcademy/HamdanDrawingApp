@@ -3,14 +3,9 @@ package com.example.drawingApp.utils
 import android.annotation.SuppressLint
 import android.graphics.Color
 import android.util.Log
-import android.view.View
-import android.widget.TextView
 import androidx.core.widget.addTextChangedListener
-import com.example.drawingApp.R
-import com.example.drawingApp.customViews.ColorSlider
-import com.example.drawingApp.customViews.ForceEditText
-import com.example.drawingApp.customViews.GradientSquare
 import com.example.drawingApp.dataClasses.Hsv
+import com.example.drawingApp.databinding.TabSheetBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlin.math.max
 import kotlin.math.min
@@ -54,146 +49,136 @@ object ColorPickerUtility {
         /**
          * BottomSheet view, either use a bottomsheet or use a view acting as a bottomsheet for the view
          */
-        view: View,
+        tabSheetBinding: TabSheetBinding,
     ) {
-        val behavior = BottomSheetBehavior.from(view)
-        val submit = view.findViewById<TextView>(R.id.dialogSubmit)
-        val cancel = view.findViewById<TextView>(R.id.dialogCancel)
-        val hueView = view.findViewById<ForceEditText>(R.id.hslH)
-        val saturationView = view.findViewById<ForceEditText>(R.id.hslS)
-        val valueView = view.findViewById<ForceEditText>(R.id.hslV)
-        val rgbRedView = view.findViewById<ForceEditText>(R.id.rgbR)
-        val rgbGreenView = view.findViewById<ForceEditText>(R.id.rgbG)
-        val rgbBlueView = view.findViewById<ForceEditText>(R.id.rgbB)
-        val colorHexView = view.findViewById<ForceEditText>(R.id.colorHex)
-        val slider = view.findViewById<ColorSlider>(R.id.slider)
-        val square = view.findViewById<GradientSquare>(R.id.gradientSquare)
-        val activeColorBox = view.findViewById<TextView>(R.id.colorOne)
-        val previousColorBox = view.findViewById<TextView>(R.id.colorTwo)
-        var previousColor = onColorTextForceUpdate().previousColor
-        previousColorBox.setBackgroundColor(previousColor)
-        //used to set the color of the active box
-        val onSettingActiveBox: (Hsv) -> Unit = { hsv ->
-            val intColor = hsv.toColor()
-            val red = Color.red(intColor)
-            val green = Color.green(intColor)
-            val blue = Color.blue(intColor)
+        val behavior = BottomSheetBehavior.from(tabSheetBinding.tabSheet)
+        tabSheetBinding.colorPickerTabSheet.apply {
+            var previousColor = onColorTextForceUpdate().previousColor
+            colorTwo.setBackgroundColor(previousColor)
+            //used to set the color of the active box
+            val onSettingActiveBox: (Hsv) -> Unit = { hsv ->
+                val intColor = hsv.toColor()
+                val red = Color.red(intColor)
+                val green = Color.green(intColor)
+                val blue = Color.blue(intColor)
 
-            hueView.forceText(hsv.hue.toString())
-            square.hue = hsv.hue
-            slider.sliderSetHue(hsv.hue)
+                hslH.forceText(hsv.hue.toString())
+                gradientSquare.hue = hsv.hue
+                slider.sliderSetHue(hsv.hue)
 
-            saturationView.forceText((hsv.saturation * SAT_VAL_FACTOR).toString())
-            square.saturation = hsv.saturation
+                hslS.forceText((hsv.saturation * SAT_VAL_FACTOR).toString())
+                gradientSquare.saturation = hsv.saturation
 
-            valueView.forceText((hsv.value * SAT_VAL_FACTOR).toString())
-            square.value = hsv.value
+                hslV.forceText((hsv.value * SAT_VAL_FACTOR).toString())
+                gradientSquare.value = hsv.value
 
-            rgbRedView.forceText(red.toString())
-            rgbGreenView.forceText(green.toString())
-            rgbBlueView.forceText(blue.toString())
-            colorHexView.forceText(Integer.toHexString(Color.rgb(red, green, blue)).drop(2))
-            activeColorBox.setBackgroundColor(intColor)
+                rgbR.forceText(red.toString())
+                rgbG.forceText(green.toString())
+                rgbB.forceText(blue.toString())
+                colorHex.forceText(Integer.toHexString(Color.rgb(red, green, blue)).drop(2))
+                colorOne.setBackgroundColor(intColor)
 
-            square.invalidate()
+                gradientSquare.invalidate()
 
-        }
+            }
 
-        //called whenever text needs to be updated
-        val updateForceViews = {
-            val pack = onColorTextForceUpdate()
-            onSettingActiveBox(pack.hsv)
-        }
+            //called whenever text needs to be updated
+            val updateForceViews = {
+                val pack = onColorTextForceUpdate()
+                onSettingActiveBox(pack.hsv)
+            }
 
-        previousColorBox.setOnClickListener {
-            //used to set the color of the active box to the previous color, impossible to be null here
-            onSettingActiveBox(Hsv.fromColorToHsv(previousColor))
-        }
-        submit.setOnClickListener {
-            val submitColor = Hsv(slider.hue, square.saturation, square.value).toColor()
-            onSubmission(submitColor)
-            previousColor = submitColor
-            previousColorBox.setBackgroundColor(previousColor)
-            behavior.state = BottomSheetBehavior.STATE_COLLAPSED
-        }
-        cancel.setOnClickListener {
-            behavior.state = BottomSheetBehavior.STATE_COLLAPSED
-        }
-        slider.onHueChange = {
-            square.hue = it
-            slider.sliderSetHue(it)
-            square.invalidate()
-            onColorUpdate(it, square.saturation, square.value)
-            updateForceViews()
-        }
-        square.onSatOrValChange = { saturation, value ->
-            square.saturation = saturation
-            square.value = value
-            onColorUpdate(slider.hue, saturation, value)
-            updateForceViews()
-        }
-        //used to prevent dragging while interacting with either gradient or slider
-        square.onDown = { behavior.isDraggable = false }
-        square.onUp = { behavior.isDraggable = true }
-        slider.onDown = { behavior.isDraggable = false }
-        slider.onUp = { behavior.isDraggable = true }
+            colorTwo.setOnClickListener {
+                //used to set the color of the active box to the previous color, impossible to be null here
+                onSettingActiveBox(Hsv.fromColorToHsv(previousColor))
+            }
+            dialogSubmit.setOnClickListener {
+                val submitColor =
+                    Hsv(slider.hue, gradientSquare.saturation, gradientSquare.value).toColor()
+                onSubmission(submitColor)
+                previousColor = submitColor
+                colorTwo.setBackgroundColor(previousColor)
+                behavior.state = BottomSheetBehavior.STATE_COLLAPSED
+            }
+            dialogCancel.setOnClickListener {
+                behavior.state = BottomSheetBehavior.STATE_COLLAPSED
+            }
+            slider.onHueChange = {
+                gradientSquare.hue = it
+                slider.sliderSetHue(it)
+                gradientSquare.invalidate()
+                onColorUpdate(it, gradientSquare.saturation, gradientSquare.value)
+                updateForceViews()
+            }
+            gradientSquare.onSatOrValChange = { saturation, value ->
+                gradientSquare.saturation = saturation
+                gradientSquare.value = value
+                onColorUpdate(slider.hue, saturation, value)
+                updateForceViews()
+            }
+            //used to prevent dragging while interacting with either gradient or slider
+            gradientSquare.onDown = { behavior.isDraggable = false }
+            gradientSquare.onUp = { behavior.isDraggable = true }
+            slider.onDown = { behavior.isDraggable = false }
+            slider.onUp = { behavior.isDraggable = true }
 
-        hueView.addTextChangedListener {
-            val hue = hueView.text.toString().toFloatOrNull()
-                ?.let { string ->
-                    max(min(MAX_HUE, string), 0f)
+            hslH.addTextChangedListener {
+                val hue = hslH.text.toString().toFloatOrNull()
+                    ?.let { string ->
+                        max(min(MAX_HUE, string), 0f)
+                    }
+                hue?.let {
+                    onColorUpdate(hue, null, null)
+                    updateForceViews()
                 }
-            hue?.let {
-                onColorUpdate(hue, null, null)
-                updateForceViews()
             }
-        }
-        saturationView.addTextChangedListener {
-            val saturation = saturationView.text.toString().toFloatOrNull()
-                ?.let { string -> max(min(1f, string / SAT_VAL_FACTOR), 0f) }
-            saturation?.let {
-                onColorUpdate(null, saturation, null)
-                updateForceViews()
+            hslS.addTextChangedListener {
+                val saturation = hslS.text.toString().toFloatOrNull()
+                    ?.let { string -> max(min(1f, string / SAT_VAL_FACTOR), 0f) }
+                saturation?.let {
+                    onColorUpdate(null, saturation, null)
+                    updateForceViews()
+                }
             }
-        }
-        valueView.addTextChangedListener {
+            hslV.addTextChangedListener {
 
-            val value = valueView.text.toString().toFloatOrNull()
-                ?.let { string -> max(min(1f, string / SAT_VAL_FACTOR), 0f) }
-            value?.let {
-                onColorUpdate(null, null, value)
-                updateForceViews()
+                val value = hslV.text.toString().toFloatOrNull()
+                    ?.let { string -> max(min(1f, string / SAT_VAL_FACTOR), 0f) }
+                value?.let {
+                    onColorUpdate(null, null, value)
+                    updateForceViews()
+                }
             }
-        }
-        listOf(rgbRedView, rgbGreenView, rgbBlueView).forEach {
-            it.addTextChangedListener {
-                if (rgbRedView.rgbInt != null && rgbGreenView.rgbInt != null && rgbBlueView.rgbInt != null) {
-                    rgbToHsv(
-                        rgbRedView.rgbInt!!,
-                        rgbGreenView.rgbInt!!,
-                        rgbBlueView.rgbInt!!
-                    ).let { hsv ->
-                        onColorUpdate(hsv.hue, hsv.saturation, hsv.value)
-                        updateForceViews()
+            listOf(rgbR, rgbG, rgbB).forEach {
+                it.addTextChangedListener {
+                    if (rgbR.rgbInt != null && rgbG.rgbInt != null && rgbB.rgbInt != null) {
+                        rgbToHsv(
+                            rgbR.rgbInt!!,
+                            rgbG.rgbInt!!,
+                            rgbB.rgbInt!!
+                        ).let { hsv ->
+                            onColorUpdate(hsv.hue, hsv.saturation, hsv.value)
+                            updateForceViews()
+                        }
                     }
                 }
             }
-        }
-        colorHexView.addTextChangedListener {
-            val hex = colorHexView.text.toString()
-            try {
-                val color = Color.parseColor("#$hex")
-                val hsv = FloatArray(3)
-                Color.colorToHSV(color, hsv)
-                slider.sliderSetHue(hsv[0])
-                onColorUpdate(hsv[0], hsv[1], hsv[2])
-                updateForceViews()
-            } catch (error: Exception) {
-                Log.v("hex error", "Error: $error")
+            colorHex.addTextChangedListener {
+                val hex = colorHex.text.toString()
+                try {
+                    val color = Color.parseColor("#$hex")
+                    val hsv = FloatArray(3)
+                    Color.colorToHSV(color, hsv)
+                    slider.sliderSetHue(hsv[0])
+                    onColorUpdate(hsv[0], hsv[1], hsv[2])
+                    updateForceViews()
+                } catch (error: Exception) {
+                    Log.v("hex error", "Error: $error")
+                }
             }
-        }
 
-        updateForceViews()
+            updateForceViews()
+        }
     }
 
 }

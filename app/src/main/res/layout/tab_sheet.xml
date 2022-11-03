@@ -180,7 +180,9 @@
         android:textSize="100sp"
         android:visibility="gone" />
 
-    <include layout="@layout/color_picker_bottom_sheet" />
+    <include
+        android:id="@+id/colorPickerTabSheet"
+        layout="@layout/color_picker_bottom_sheet" />
 
     <TextView
         android:id="@+id/hideableBrush"

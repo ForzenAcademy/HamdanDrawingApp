@@ -6,19 +6,18 @@ import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.animation.AnimationUtils
-import android.widget.EditText
-import android.widget.LinearLayout
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.children
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.drawingApp.EditLayerAdapter
 import com.example.drawingApp.LayerViewModel
 import com.example.drawingApp.R
+import com.example.drawingApp.databinding.EditLayerRecyclerBinding
+import com.example.drawingApp.databinding.LayerDialogBinding
+import com.example.drawingApp.databinding.TabSheetBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -39,7 +38,7 @@ object DialogUtility {
     )
 
     data class SheetTool(
-        val btn: Int, val btnTab: Int, val body: Int, val tool: ToolEnum
+        val btn: View, val btnTab: View, val body: View, val tool: ToolEnum
     )
 
     enum class ToolEnum {
@@ -48,12 +47,12 @@ object DialogUtility {
 
     data class TabState(
         val tabState: Int,
-        val selectedTool: SheetTool,
+        val selectedTool: ToolEnum,
         val isInitialized: Boolean
     )
 
     fun tabSheetDialog(
-        view: LinearLayout,
+        binding: TabSheetBinding,
         /**
          * used to set the initial state of the tab sheet, primarily used for maintaining in rotation
          * also used to decide if the state needs to be updated in the view
@@ -67,83 +66,100 @@ object DialogUtility {
         /**
          * used to gurantee correct tool is selected when sliding up or down
          */
-        onSheetSlide: () -> SheetTool,
+        onSheetSlide: () -> ToolEnum,
     ) {
-        val behavior = BottomSheetBehavior.from(view)
-        var selectedTool = state.selectedTool
-        behavior.state = state.tabState
-        val tools = listOf(
-            SheetTool(
-                R.id.colorGradientBtn,
-                R.id.colorGradientTab,
-                R.id.colorPickerLayout,
-                ToolEnum.Gradient
-            ),
-            SheetTool(
-                R.id.brushSettingsBtn,
-                R.id.brushSettingsTab,
-                R.id.hideableBrush,
-                ToolEnum.Brush
-            ),
-            SheetTool(R.id.moveImageBtn, R.id.moveImageTab, R.id.hideableMove, ToolEnum.Move),
-            SheetTool(R.id.resizeBtn, R.id.resizeTab, R.id.hideableResize, ToolEnum.Resize),
-            SheetTool(R.id.filtersBtn, R.id.filtersTab, R.id.hideableFilter, ToolEnum.Filters),
-            SheetTool(R.id.layersBtn, R.id.layersTab, R.id.hideableLayer, ToolEnum.Layers)
-        )
-        val callback = object : BottomSheetCallback() {
-            override fun onStateChanged(bottomSheet: View, newState: Int) {
-                if (newState == BottomSheetBehavior.STATE_COLLAPSED || newState == BottomSheetBehavior.STATE_EXPANDED) {
-                    onSheetStateChanged(
-                        state.copy(
-                            tabState = newState,
-                            selectedTool = onSheetSlide(),
-                            isInitialized = true
-                        ),
-                    )
+        binding.apply {
+            val behavior = BottomSheetBehavior.from(tabSheet)
+            var selectedTool = state.selectedTool
+            behavior.state = state.tabState
+            val tools = listOf(
+                SheetTool(
+                    colorGradientBtn,
+                    colorGradientTab,
+                    colorPickerTabSheet.colorPickerLayout,
+                    ToolEnum.Gradient
+                ),
+                SheetTool(
+                    brushSettingsBtn,
+                    brushSettingsTab,
+                    hideableBrush,
+                    ToolEnum.Brush,
+                ),
+                SheetTool(
+                    moveImageBtn,
+                    moveImageTab,
+                    hideableMove,
+                    ToolEnum.Move
+                ),
+                SheetTool(
+                    resizeBtn,
+                    resizeTab,
+                    hideableResize,
+                    ToolEnum.Resize
+                ),
+                SheetTool(
+                    filtersBtn,
+                    filtersTab,
+                    hideableFilter,
+                    ToolEnum.Filters
+                ),
+                SheetTool(layersBtn, layersTab, hideableLayer, ToolEnum.Layers)
+            )
+            val callback = object : BottomSheetCallback() {
+                override fun onStateChanged(bottomSheet: View, newState: Int) {
+                    if (newState == BottomSheetBehavior.STATE_COLLAPSED || newState == BottomSheetBehavior.STATE_EXPANDED) {
+                        onSheetStateChanged(
+                            state.copy(
+                                tabState = newState,
+                                selectedTool = onSheetSlide(),
+                                isInitialized = true
+                            ),
+                        )
+                    }
+                }
+
+                override fun onSlide(bottomSheet: View, slideOffset: Float) {}
+            }
+            val onSheetButtonClicked: (tool: SheetTool) -> Unit = {
+                tools.forEach { toolItem ->
+                    toolItem.body.clearAnimation()
+                    toolItem.btnTab.backgroundTintList =
+                        ColorStateList.valueOf(
+                            Color.WHITE
+                        )
+                }
+                selectedTool = it.tool
+                showTabContent(tabSheet, tools, it)
+                onSheetStateChanged(
+                    state.copy(
+                        tabState = BottomSheetBehavior.STATE_EXPANDED,
+                        selectedTool = selectedTool,
+                        isInitialized = true,
+                    ),
+                )
+            }
+            tools.forEach { tool ->
+                (tool.btn).setOnClickListener {
+                    onSheetButtonClicked(tool)
                 }
             }
-
-            override fun onSlide(bottomSheet: View, slideOffset: Float) {}
-        }
-        val onSheetButtonClicked: (tool: SheetTool) -> Unit = {
-            tools.forEach { toolItem ->
-                view.findViewById<View>(toolItem.body).clearAnimation()
-                view.findViewById<View>(toolItem.btnTab).backgroundTintList =
-                    ColorStateList.valueOf(
-                        Color.WHITE
-                    )
+            if (!state.isInitialized) {
+                tools.find { it.tool == state.selectedTool }
+                    ?.let { showTabContent(tabSheet, tools, it) }
+                //used to avoid animations from playing when sheet is changed from expanded or collapsed and on rotation
+                tabSheet.children.forEach { it.clearAnimation() }
+                behavior.addBottomSheetCallback(callback)
             }
-            selectedTool = it
-            showTabContent(view, tools, selectedTool)
-            onSheetStateChanged(
-                state.copy(
-                    tabState = BottomSheetBehavior.STATE_EXPANDED,
-                    selectedTool = selectedTool,
-                    isInitialized = true,
-                ),
-            )
-        }
-        tools.forEach { tool ->
-            view.findViewById<View>(tool.btn).setOnClickListener {
-                onSheetButtonClicked(tool)
-            }
-        }
-
-        if (!state.isInitialized) {
-            showTabContent(view, tools, state.selectedTool)
-            //used to avoid animations from playing when sheet is changed from expanded or collapsed and on rotation
-            view.children.forEach { it.clearAnimation() }
-            behavior.addBottomSheetCallback(callback)
         }
     }
 
     fun showTabContent(view: View, tools: List<SheetTool>, tool: SheetTool) {
         tools.forEach {
-            view.findViewById<View>(it.body).apply {
+            (it.body).apply {
                 isVisible = (it == tool)
                 if (it == tool) {
                     this.startAnimation(AnimationUtils.loadAnimation(view.context, R.anim.fade_in))
-                    view.findViewById<View>(it.btnTab).backgroundTintList =
+                    (it.btnTab).backgroundTintList =
                         ColorStateList.valueOf(
                             MaterialColors.getColor(
                                 view,
@@ -184,10 +200,11 @@ object DialogUtility {
          */
     ): AlertDialog {
         val inflater = LayoutInflater.from(context)
-        val view = inflater.inflate(R.layout.layer_dialog, null)
-        val layerField = view.findViewById<EditText>(R.id.newLayerField)
-        val errorText = view.findViewById<TextView>(R.id.dialogError)
-        val titleText = view.findViewById<TextView>(R.id.layerDialogTitle)
+        val binding = LayerDialogBinding.inflate(inflater)
+        val view = binding.root
+        val layerField = binding.newLayerField
+        val errorText = binding.dialogError
+        val titleText = binding.layerDialogTitle
         if (isCreatingNewLayer) titleText.setText(R.string.new_layer_dialog_title)
         else titleText.setText(R.string.edit_layer_dialog_title)
 
@@ -206,11 +223,11 @@ object DialogUtility {
             setView(view)
         }.create()
 
-        view.findViewById<TextView>(R.id.newLayerCancel).setOnClickListener {
+        binding.newLayerCancel.setOnClickListener {
             dialog.dismiss()
         }
 
-        view.findViewById<TextView>(R.id.newLayerOk).setOnClickListener {
+        binding.newLayerOk.setOnClickListener {
             val fieldString = layerField.text.toString().trim()
             errorText.isVisible = fieldString.length > MAX_CHAR_LEN
             if (!errorText.isVisible) {
@@ -272,12 +289,13 @@ object DialogUtility {
 
         val sheet = BottomSheetDialog(context)
         val inflater = LayoutInflater.from(context)
-        val view = inflater.inflate(R.layout.edit_layer_recycler, null)
-        view.findViewById<RecyclerView>(R.id.editLayerRecycler).apply {
+        val binding = EditLayerRecyclerBinding.inflate(inflater)
+        val view = binding.root
+        binding.editLayerRecycler.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = myAdapter
         }
-        view.findViewById<TextView>(R.id.closeLayerView).setOnClickListener { sheet.dismiss() }
+        binding.closeLayerView.setOnClickListener { sheet.dismiss() }
 
         sheet.setContentView(view)
         sheet.setOnDismissListener { onSheetDismiss() }
