@@ -23,9 +23,8 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCa
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.color.MaterialColors
 
-object DialogUtility {
+class DialogUtility {
 
-    const val MAX_CHAR_LEN = 16
 
     /**
      * used to update the sheet adapter with the onEdit and onDelete lambda
@@ -344,5 +343,9 @@ object DialogUtility {
         }
         dialog.show()
         return alert
+    }
+
+    companion object {
+        const val MAX_CHAR_LEN = 16
     }
 }

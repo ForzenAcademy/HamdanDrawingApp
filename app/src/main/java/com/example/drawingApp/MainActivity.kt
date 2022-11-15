@@ -4,6 +4,7 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
 import android.os.StrictMode
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -14,11 +15,24 @@ import com.example.drawingApp.databinding.ActivityMainBinding
 import com.example.drawingApp.utils.ColorPickerUtility
 import com.example.drawingApp.utils.DialogUtility
 import com.example.drawingApp.utils.ImageUtility
+import javax.inject.Inject
 
 
 class MainActivity : AppCompatActivity() {
-    private val model: DrawingViewModel by viewModels()
+
+    @Inject
+    lateinit var colorPickerUtility: ColorPickerUtility
+
+    @Inject
+    lateinit var imageUtility: ImageUtility
+
+    @Inject
+    lateinit var dialogUtility: DialogUtility
+
+
+//    private val model: DrawingViewModel by viewModels()
     private lateinit var binding: ActivityMainBinding
+
 
     var botSheetObj: DialogUtility.SheetObject? = null
     var alertDialog: AlertDialog? = null
@@ -26,16 +40,21 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val model: DrawingViewModel by viewModels {
+            DrawingViewModelFactory(this, savedInstanceState)
+        }
+        (application as DaggerApplication).appComponent.inject(this)
         binding = ActivityMainBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
+        Log.v("Hamdan", "Past contentView")
         enableStrictMode()
         val drawingFieldView = binding.drawField
         val getGalleryImageView = binding.getImageButton
         var onSubmission: (String?) -> Boolean
         val imageContent = registerForActivityResult(ActivityResultContracts.GetContent()) {
             it?.let { uri ->
-                ImageUtility.getBitmapFromUri(uri, this, {
+                imageUtility.getBitmapFromUri(uri, this, {
                     Toast.makeText(this, "Error getting Bitmap from URI", Toast.LENGTH_SHORT)
                 }) { bitmap ->
                     drawingFieldView.setBitmapFromImageBitmap(bitmap)
@@ -50,6 +69,7 @@ class MainActivity : AppCompatActivity() {
         drawingFieldView.onBitmapUpdate = {
             model.activeBitmap = it
         }
+        Log.v("Hamdan", "Before the state")
         //whenever we receive a need to update the state of the view
         model.onUpdate = { state ->
             stateColor = state.chosenColor
@@ -59,7 +79,7 @@ class MainActivity : AppCompatActivity() {
                 drawingFieldView.invalidate()
             }
             drawingFieldView.setPaintColor(state.chosenColor)
-            DialogUtility.tabSheetDialog(
+            dialogUtility.tabSheetDialog(
                 //tabBinding.tabSheet,
                 binding.tabSheetMain,
                 state = state.tabSheetState,
@@ -95,7 +115,7 @@ class MainActivity : AppCompatActivity() {
             }
             //if the sheet is open, open it with the correct information
             if (state.isLayerSheetOpen && botSheetObj == null) {
-                botSheetObj = DialogUtility.showViewingLayersDialog(
+                botSheetObj = dialogUtility.showViewingLayersDialog(
                     context = this,
                     layerNames = state.layers,
                     onEdit = {
@@ -113,7 +133,7 @@ class MainActivity : AppCompatActivity() {
             }
             //if the dialog is open, open it with the correct type of submission
             if (state.isLayerDialogOpen && alertDialog == null) {
-                alertDialog = DialogUtility.showLayerAlertDialog(
+                alertDialog = dialogUtility.showLayerAlertDialog(
                     context = this,
                     startString = hintText(state.layers, state.layerDialogText),
                     isCreatingNewLayer = !state.isLayerSheetOpen,   //way to check if were editing or creating a layer
@@ -123,7 +143,7 @@ class MainActivity : AppCompatActivity() {
             }
             //if the delete dialog is open
             if (state.isDeleteDialogOpen && deleteDialog == null) {
-                deleteDialog = DialogUtility.showDeleteDialog(
+                deleteDialog = dialogUtility.showDeleteDialog(
                     context = this,
                     onDismiss = {
                         model.closeDeleteDialog()
@@ -148,7 +168,7 @@ class MainActivity : AppCompatActivity() {
             model.layerListClicked()
         }
 
-        ColorPickerUtility.colorPickerSheet(
+        colorPickerUtility.colorPickerSheet(
             onColorUpdate = { hue, saturation, value ->
                 model.hsvColorUpdate(hue, saturation, value)
             },
