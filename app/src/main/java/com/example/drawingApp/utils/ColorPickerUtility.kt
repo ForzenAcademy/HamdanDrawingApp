@@ -10,9 +10,10 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlin.math.max
 import kotlin.math.min
 
-object ColorPickerUtility {
-    const val MAX_HUE = 360f
-    const val SAT_VAL_FACTOR = 100
+
+class ColorPickerUtility {
+
+
 
     data class ColorPack(
         val hsv: Hsv,
@@ -180,5 +181,8 @@ object ColorPickerUtility {
             updateForceViews()
         }
     }
-
+    companion object{
+        const val MAX_HUE = 360f
+        const val SAT_VAL_FACTOR = 100
+    }
 }

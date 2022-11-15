@@ -9,7 +9,7 @@ import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.example.drawingApp.R
 
-object ImageUtility {
+class ImageUtility {
     /**
      * function that takes a Uri and gets a bitmap from it from the gallery.
      */

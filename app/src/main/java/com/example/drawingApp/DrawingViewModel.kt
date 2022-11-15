@@ -2,6 +2,7 @@ package com.example.drawingApp
 
 import android.graphics.Bitmap
 import android.graphics.Color
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.drawingApp.dataClasses.Hsv
@@ -9,7 +10,7 @@ import com.example.drawingApp.utils.DialogUtility
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.coroutines.CoroutineScope
 
-class DrawingViewModel : ViewModel() {
+class DrawingViewModel(handle: SavedStateHandle) : ViewModel() {
 
     data class ViewState(
         val isColorSheetOpen: Boolean,
