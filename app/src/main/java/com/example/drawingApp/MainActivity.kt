@@ -4,7 +4,6 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
 import android.os.StrictMode
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -12,6 +11,8 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.example.drawingApp.databinding.ActivityMainBinding
+import com.example.drawingApp.di.DaggerMainActivityComponent
+import com.example.drawingApp.di.MainActivityModule
 import com.example.drawingApp.utils.ColorPickerUtility
 import com.example.drawingApp.utils.DialogUtility
 import com.example.drawingApp.utils.ImageUtility
@@ -29,10 +30,7 @@ class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var dialogUtility: DialogUtility
 
-
-//    private val model: DrawingViewModel by viewModels()
     private lateinit var binding: ActivityMainBinding
-
 
     var botSheetObj: DialogUtility.SheetObject? = null
     var alertDialog: AlertDialog? = null
@@ -43,11 +41,15 @@ class MainActivity : AppCompatActivity() {
         val model: DrawingViewModel by viewModels {
             DrawingViewModelFactory(this, savedInstanceState)
         }
-        (application as DaggerApplication).appComponent.inject(this)
+        DaggerMainActivityComponent
+            .builder()
+            .applicationComponent((application as DaggerApplication).appComponent)
+            .mainActivityModule(MainActivityModule())
+            .build()
+            .inject(this)
         binding = ActivityMainBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
-        Log.v("Hamdan", "Past contentView")
         enableStrictMode()
         val drawingFieldView = binding.drawField
         val getGalleryImageView = binding.getImageButton
@@ -69,7 +71,6 @@ class MainActivity : AppCompatActivity() {
         drawingFieldView.onBitmapUpdate = {
             model.activeBitmap = it
         }
-        Log.v("Hamdan", "Before the state")
         //whenever we receive a need to update the state of the view
         model.onUpdate = { state ->
             stateColor = state.chosenColor
@@ -80,7 +81,6 @@ class MainActivity : AppCompatActivity() {
             }
             drawingFieldView.setPaintColor(state.chosenColor)
             dialogUtility.tabSheetDialog(
-                //tabBinding.tabSheet,
                 binding.tabSheetMain,
                 state = state.tabSheetState,
                 onSheetStateChanged = { model.tabSheetChange(it) },
